@@ -2,12 +2,15 @@ package com.demo.warehouse.domain;
 
 import java.math.BigDecimal;
 
+import com.demo.warehouse.mapper.IdName;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -16,8 +19,10 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @Entity
-@Table(name = "dresses")
-public class Dress extends TenantScopedEntity {
+@Table(name = "dresses",uniqueConstraints = {
+    @UniqueConstraint(columnNames = {"sku", "tenant_id"}) // La combinación debe ser única
+})
+public class Dress extends TenantScopedEntity implements IdName<Long>{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,7 +31,7 @@ public class Dress extends TenantScopedEntity {
     @Column(nullable = false, length = 150)
     private String title;
 
-    @Column(nullable = false, unique = true, length = 64)
+    @Column(nullable = false, length = 64)
     private String sku;
 
     @Column(length = 64)
@@ -34,9 +39,12 @@ public class Dress extends TenantScopedEntity {
 
     @Column(length = 64)
     private String color;
-    private Integer stock;
+    @Column(nullable = false)
+    private Integer stock = 0;
     @Column(precision = 10, scale = 2)
     private BigDecimal price;
+
+    @Override
     public String getName(){
         return this.sku;
     }

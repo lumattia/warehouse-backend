@@ -1,6 +1,6 @@
 package com.demo.warehouse.mapper;
 
-public interface IdName {
-    Long getId();
+public interface IdName<T> {
+    T getId();
     String getName();
 }

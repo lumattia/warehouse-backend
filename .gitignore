@@ -21,3 +21,4 @@ Thumbs.db
 
 # Auth0 (Secretos)
 .env
+src/main/resources/application.yml

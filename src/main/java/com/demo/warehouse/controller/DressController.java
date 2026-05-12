@@ -23,12 +23,12 @@ import com.demo.warehouse.service.DressService;
 import com.demo.warehouse.specification.DressSpecification;
 
 @RestController
-@RequestMapping("/api/dresses")
+@RequestMapping("/dresses")
 @RequiredArgsConstructor
 public class DressController {
     private final DressService dressService;
 
-    @GetMapping
+    @GetMapping("/page")
     public Page<DressDtos.DressResponse> page(DressDtos.DressFilterRequest request, Pageable pageable) {
         return dressService.page(DressSpecification.filterBy(request), pageable);
     }
@@ -37,15 +37,15 @@ public class DressController {
         return dressService.list();
     }
 
-    @PostMapping
+    @PostMapping("/create")
     public DressDtos.DressResponse create(@Valid @RequestBody DressDtos.DressCreateRequest request) {
         return dressService.create(request);
     }
-    @PutMapping
+    @PutMapping("/update")
     public DressDtos.DressResponse update(@Valid @RequestBody DressDtos.DressUpdateRequest request) {
         return dressService.update(request);
     }
-    @DeleteMapping
+    @DeleteMapping("/delete")
     public void delete(@NotNull Long toDeleteId) {
         dressService.delete(toDeleteId);
     }

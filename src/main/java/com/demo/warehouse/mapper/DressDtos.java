@@ -51,18 +51,13 @@ public class DressDtos {
     ) {}
     @Builder
     public static record DressResponse(
-        @NotBlank
         Long id,
-        @NotBlank
-        String name,
-        @NotNull
+        String title,
         String sku,
-        @NotNull
         String size,
-        @NotNull
         String color,
-        @NotNull
-        BigDecimal price
+        BigDecimal price,
+        Integer stock
     ) {}
 
 }

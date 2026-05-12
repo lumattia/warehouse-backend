@@ -7,7 +7,7 @@ import com.demo.warehouse.mapper.DressDtos.DressFilterRequest;
 public class DressSpecification {
     public static Specification<Dress> filterBy(DressFilterRequest filters) {
         return SpecBuilder.repo(Dress.class)
-        .like("titulo", filters.title())
+        .like("title", filters.title())
         .like("sku", filters.sku())
         .equal("color", filters.color())
         .equal("size", filters.size())

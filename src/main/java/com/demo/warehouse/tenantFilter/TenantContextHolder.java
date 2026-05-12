@@ -1,5 +1,7 @@
 package com.demo.warehouse.tenantFilter;
 
+import java.util.UUID;
+
 import com.demo.warehouse.domain.Tenant;
 
 public final class TenantContextHolder {
@@ -18,7 +20,7 @@ public final class TenantContextHolder {
     public static Tenant getTenant() {
         return get().getEffectiveUser().getTenant();
     }
-    public static Long getTenantId() {
+    public static UUID getTenantId() {
         return getTenant().getId();
     }
 

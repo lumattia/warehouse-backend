@@ -3,8 +3,8 @@ auth0:
   audience: https://mydemo.com
   issuer: https://dev-ia6wuqy53uzqku85.us.auth0.com/
   management:
-    clientId: ${AUTH0_MGMT_CLIENT_ID:none}
-    clientSecret: ${AUTH0_MGMT_CLIENT_SECRET:none}
+    clientId: tIuLtiFvpgae1z562kQXkf3Ecuy6s3aq
+    clientSecret: -EIZCnizdG1vOymv4fV2jga5moEgxtQBf2D2DOVQGpLFDz5Gl-7ubh7_DUYt8clg
     connection: Username-Password-Authentication
 
 spring:

@@ -29,25 +29,23 @@ public class InventoryService {
     @Transactional
     public Inventory create(InventoryCreateRequest request) {
         Inventory inventory = new Inventory();
-        Dress dress = dressRepository.getReferenceById(request.dressId());
+        Dress dress = dressRepository.findById(request.dressId()).orElseThrow();
         dress.addStock(request.quantity());
         inventory.setTenant(dress.getTenant());
         inventory.setDress(dress);
         inventory.setQuantity(request.quantity());
         inventory.setInstant(request.instant());
-        dressRepository.save(dress);
         return inventoryRepository.save(inventory);
     }
 
     @Transactional
     public Inventory update(InventoryUpdateRequest request) {
         Inventory inventory = inventoryRepository.getReferenceById(request.id());
-        Dress dress = dressRepository.getReferenceById(request.dressId());
+        Dress dress = dressRepository.findById(request.dressId()).orElseThrow();
         dress.setStock(dress.getStock()-inventory.getQuantity()+request.quantity());
         inventory.setDress(dress);
         inventory.setQuantity(request.quantity());
         inventory.setInstant(request.instant());
-        dressRepository.save(dress);
         return inventoryRepository.save(inventory);
     }
     @Transactional

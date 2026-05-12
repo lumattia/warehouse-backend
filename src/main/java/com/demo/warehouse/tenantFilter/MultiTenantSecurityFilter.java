@@ -45,7 +45,7 @@ public class MultiTenantSecurityFilter extends OncePerRequestFilter {
             }
 
             String username = auth.getName();
-            realUser = userRepository.findByUsername(username)
+            realUser = userRepository.findByAuth0Sub(username)
                     .orElseThrow(() -> new RuntimeException("User not found: " + username));
 
             Optional<User> effectiveUser = resolveEffectiveUser(realUser);

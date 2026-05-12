@@ -21,25 +21,25 @@ import com.demo.warehouse.service.InventoryService;
 import com.demo.warehouse.specification.InventorySpecification;
 
 @RestController
-@RequestMapping("/api/inventory")
+@RequestMapping("/inventory")
 @RequiredArgsConstructor
 public class InventoryController {
     private final InventoryService inventoryService;
 
-    @GetMapping
+    @GetMapping("/page")
     public Page<Inventory> page(InventoryFilterRequest request, Pageable pageable) {
         return inventoryService.page(InventorySpecification.filterBy(request),pageable);
     }
 
-    @PostMapping
+    @PostMapping("/create")
     public Inventory create(@Valid @RequestBody InventoryCreateRequest request) {
         return inventoryService.create(request);
     }
-    @PutMapping
+    @PutMapping("/update")
     public Inventory update(@Valid @RequestBody InventoryUpdateRequest request) {
         return inventoryService.update(request);
     }
-    @DeleteMapping
+    @DeleteMapping("/delete")
     public void delete(Long toDeleteId) {
         inventoryService.delete(toDeleteId);
     }
