@@ -27,17 +27,14 @@ public class MultiTenantSecurityFilter extends OncePerRequestFilter {
 
     private final UserRepository userRepository;
 
-    @PersistenceContext
-    private EntityManager entityManager;
-
+    // Ya no necesitamos el EntityManager aquí, el Aspecto se encarga
+    
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
 
-        Filter tenantFilter = null;
         try {
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-            User realUser;
 
             if (auth == null || !auth.isAuthenticated() || auth instanceof AnonymousAuthenticationToken) {
                 filterChain.doFilter(request, response);
@@ -45,36 +42,30 @@ public class MultiTenantSecurityFilter extends OncePerRequestFilter {
             }
 
             String username = auth.getName();
-            realUser = userRepository.findByAuth0Sub(username)
+            User realUser = userRepository.findByAuth0Sub(username)
                     .orElseThrow(() -> new RuntimeException("User not found: " + username));
 
             Optional<User> effectiveUser = resolveEffectiveUser(realUser);
 
+            // Seteamos el Contexto (Esto es vital para que el Aspecto sepa qué tenant usar)
             TenantContextHolder.set(TenantContext.builder()
                     .realUser(realUser)
                     .effectiveUser(effectiveUser)
                     .build());
 
-            Session session = entityManager.unwrap(Session.class);
-            tenantFilter = session.enableFilter("tenantFilter");
-            tenantFilter.setParameter("tenantId", TenantContextHolder.get().getEffectiveUser().getTenant().getId());
-
             filterChain.doFilter(request, response);
+
         } finally {
-            if (tenantFilter != null) {
-                entityManager.unwrap(Session.class).disableFilter("tenantFilter");
-            }
+            // Limpiamos siempre al terminar la petición
             TenantContextHolder.clear();
         }
     }
 
     private Optional<User> resolveEffectiveUser(User realUser) {
         Long activeUserContextId = realUser.getActiveUserContextId();
-
         if (activeUserContextId == null || activeUserContextId.equals(realUser.getId())) {
             return Optional.empty();
         }
-
         return userRepository.findById(activeUserContextId)
                 .filter(effective -> effective.getTenant().getId().equals(realUser.getTenant().getId()));
     }

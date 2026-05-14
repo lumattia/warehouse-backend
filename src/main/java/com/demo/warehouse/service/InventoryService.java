@@ -8,7 +8,6 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.demo.warehouse.domain.Dress;
 import com.demo.warehouse.domain.Inventory;
 import com.demo.warehouse.mapper.InventoryDtos.InventoryCreateRequest;
 import com.demo.warehouse.mapper.InventoryDtos.InventoryUpdateRequest;
@@ -28,8 +27,8 @@ public class InventoryService {
 
     @Transactional
     public Inventory create(InventoryCreateRequest request) {
-        Inventory inventory = new Inventory();
-        Dress dress = dressRepository.findById(request.dressId()).orElseThrow();
+        var inventory = new Inventory();
+        var dress = dressRepository.findById(request.dressId()).orElseThrow();
         dress.addStock(request.quantity());
         inventory.setTenant(dress.getTenant());
         inventory.setDress(dress);
@@ -40,18 +39,19 @@ public class InventoryService {
 
     @Transactional
     public Inventory update(InventoryUpdateRequest request) {
-        Inventory inventory = inventoryRepository.getReferenceById(request.id());
-        Dress dress = dressRepository.findById(request.dressId()).orElseThrow();
+        var inventory = inventoryRepository.getReferenceById(request.id());
+        var dress = dressRepository.findById(request.dressId()).orElseThrow();
         dress.setStock(dress.getStock()-inventory.getQuantity()+request.quantity());
         inventory.setDress(dress);
         inventory.setQuantity(request.quantity());
         inventory.setInstant(request.instant());
         return inventoryRepository.save(inventory);
     }
+    
     @Transactional
     public void delete(Long toDeleteId) {
-        Inventory inventory = inventoryRepository.getReferenceById(toDeleteId);
-        Dress dress = inventory.getDress();
+        var inventory = inventoryRepository.getReferenceById(toDeleteId);
+        var dress = inventory.getDress();
         dress.setStock(dress.getStock()-inventory.getQuantity());
         dressRepository.save(dress);
         inventoryRepository.deleteById(toDeleteId);

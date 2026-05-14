@@ -35,6 +35,10 @@ public class DressController {
     @GetMapping("/list")
     public List<IdName> list() {
         return dressService.list();
+        }
+    @GetMapping("/{id}")
+    public DressDtos.DressResponse detail(@NotNull Long id) {
+        return dressService.detail(id);
     }
 
     @PostMapping("/create")

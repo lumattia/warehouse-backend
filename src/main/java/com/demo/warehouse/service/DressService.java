@@ -26,17 +26,24 @@ public class DressService {
 
     @Transactional(readOnly = true)
     public Page<DressDtos.DressResponse> page(Specification<Dress> spec, @NonNull Pageable pageable) {
-        return dressRepository.findAll(spec, pageable)
-                .map(dressMapper::toResponse);
+        return dressRepository.findAll(spec, pageable).map(dressMapper::toResponse);
     }
+    
     @Transactional(readOnly = true)
     public List<IdName> list() {
         return dressRepository.findAllProjectedBy(IdName.class);
     }
+    
+    @Transactional(readOnly = true)
+    public DressDtos.DressResponse detail(Long id) {
+        return dressRepository.findById(id)
+                .map(dressMapper::toResponse)
+                .orElseThrow(() -> new RuntimeException("Dress not found"));
+    }
 
     @Transactional
     public DressDtos.DressResponse create(DressDtos.DressCreateRequest request) {
-        Dress dress = new Dress();
+        var dress = new Dress();
         dress.setTenant(TenantContextHolder.getTenant());
         dress.setTitle(request.title());
         dress.setSku(request.sku());
@@ -48,7 +55,7 @@ public class DressService {
 
     @Transactional
     public DressDtos.DressResponse update(DressDtos.DressUpdateRequest request) {
-        Dress dress = dressRepository.getReferenceById(request.id());
+        var dress = dressRepository.getReferenceById(request.id());
         dress.setTitle(request.title());
         dress.setSku(request.sku());
         dress.setSize(request.size());
@@ -56,6 +63,7 @@ public class DressService {
         dress.setPrice(request.price());
         return dressMapper.toResponse(dressRepository.save(dress));
     }
+    
     @Transactional
     public void delete(Long toDeleteId) {
         dressRepository.deleteById(toDeleteId);
