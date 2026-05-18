@@ -13,8 +13,6 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import com.demo.warehouse.tenantFilter.MultiTenantSecurityFilter;
-
 import java.util.Arrays;
 
 @Configuration
@@ -22,8 +20,6 @@ import java.util.Arrays;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    private final MultiTenantSecurityFilter multiTenantSecurityFilter;
-    
     @Value("${auth0.enabled:false}")
     private boolean auth0Enabled;
 
@@ -42,9 +38,6 @@ public class SecurityConfig {
         } else {
             http.authorizeHttpRequests(auth -> auth.anyRequest().permitAll());
         }
-
-        http.addFilterAfter(multiTenantSecurityFilter, org.springframework.security.oauth2.server.resource.web.authentication.BearerTokenAuthenticationFilter.class);
-
         return http.build();
     }
    @Bean

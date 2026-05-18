@@ -22,7 +22,7 @@ public class InventoryService {
     
     @Transactional(readOnly = true)
     public Page<Inventory> page(Specification<Inventory> spec, Pageable pageable) {
-        return inventoryRepository.findAll(spec, pageable);
+        return inventoryRepository.getBySpec(spec, pageable);
     }
 
     @Transactional
@@ -30,7 +30,6 @@ public class InventoryService {
         var inventory = new Inventory();
         var dress = dressRepository.findById(request.dressId()).orElseThrow();
         dress.addStock(request.quantity());
-        inventory.setTenant(dress.getTenant());
         inventory.setDress(dress);
         inventory.setQuantity(request.quantity());
         inventory.setInstant(request.instant());
@@ -39,7 +38,7 @@ public class InventoryService {
 
     @Transactional
     public Inventory update(InventoryUpdateRequest request) {
-        var inventory = inventoryRepository.getReferenceById(request.id());
+        var inventory = inventoryRepository.getByIdOrThrow(request.id());
         var dress = dressRepository.findById(request.dressId()).orElseThrow();
         dress.setStock(dress.getStock()-inventory.getQuantity()+request.quantity());
         inventory.setDress(dress);
@@ -50,7 +49,7 @@ public class InventoryService {
     
     @Transactional
     public void delete(Long toDeleteId) {
-        var inventory = inventoryRepository.getReferenceById(toDeleteId);
+        var inventory = inventoryRepository.getByIdOrThrow(toDeleteId);
         var dress = inventory.getDress();
         dress.setStock(dress.getStock()-inventory.getQuantity());
         dressRepository.save(dress);

@@ -33,7 +33,7 @@ public class DressController {
         return dressService.page(DressSpecification.filterBy(request), pageable);
     }
     @GetMapping("/list")
-    public List<IdName> list() {
+    public List<IdName<Long>> list() {
         return dressService.list();
         }
     @GetMapping("/{id}")

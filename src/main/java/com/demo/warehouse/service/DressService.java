@@ -13,9 +13,8 @@ import org.springframework.transaction.annotation.Transactional;
 import com.demo.warehouse.domain.Dress;
 import com.demo.warehouse.mapper.DressMapper;
 import com.demo.warehouse.mapper.IdName;
-import com.demo.warehouse.mapper.DressDtos;
 import com.demo.warehouse.repository.DressRepository;
-import com.demo.warehouse.tenantFilter.TenantContextHolder;
+import com.demo.warehouse.mapper.DressDtos;
 
 @Service
 @RequiredArgsConstructor
@@ -26,42 +25,43 @@ public class DressService {
 
     @Transactional(readOnly = true)
     public Page<DressDtos.DressResponse> page(Specification<Dress> spec, @NonNull Pageable pageable) {
-        return dressRepository.findAll(spec, pageable).map(dressMapper::toResponse);
+        return dressRepository.getBySpec(spec, pageable).map(dressMapper::toResponse);
     }
     
     @Transactional(readOnly = true)
-    public List<IdName> list() {
-        return dressRepository.findAllProjectedBy(IdName.class);
+    public List<IdName<Long>> list() {
+        return dressRepository.getAllAsIdName();
     }
     
     @Transactional(readOnly = true)
     public DressDtos.DressResponse detail(Long id) {
-        return dressRepository.findById(id)
-                .map(dressMapper::toResponse)
+        var dress = dressRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Dress not found"));
+        return dressMapper.toResponse(dress);
     }
 
     @Transactional
     public DressDtos.DressResponse create(DressDtos.DressCreateRequest request) {
         var dress = new Dress();
-        dress.setTenant(TenantContextHolder.getTenant());
         dress.setTitle(request.title());
         dress.setSku(request.sku());
         dress.setSize(request.size());
         dress.setColor(request.color());
         dress.setPrice(request.price());
+        dress.setStock(0);
         return dressMapper.toResponse(dressRepository.save(dress));
     }
 
     @Transactional
     public DressDtos.DressResponse update(DressDtos.DressUpdateRequest request) {
-        var dress = dressRepository.getReferenceById(request.id());
+        var dress = dressRepository.getByIdOrThrow(request.id());
         dress.setTitle(request.title());
         dress.setSku(request.sku());
         dress.setSize(request.size());
         dress.setColor(request.color());
         dress.setPrice(request.price());
-        return dressMapper.toResponse(dressRepository.save(dress));
+        dressRepository.save(dress);
+        return dressMapper.toResponse(dress);
     }
     
     @Transactional

@@ -9,7 +9,8 @@ import com.demo.warehouse.mapper.UserMapper;
 import com.demo.warehouse.repository.TenantRepository;
 import com.demo.warehouse.repository.UserRepository;
 import com.demo.warehouse.service.Auth0ManagementService;
-import com.demo.warehouse.tenantFilter.TenantContextHolder;
+import com.demo.warehouse.tenantFilter.UserContextHolder;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -33,7 +34,7 @@ public class UserController {
     private final UserMapper userMapper;
     @GetMapping("/me")
     public UserDto.LoggedUserDto getCurrentUser(@AuthenticationPrincipal Jwt jwt) {
-        return userMapper.toLogged(TenantContextHolder.get().getEffectiveUser());
+        return userMapper.toLogged(UserContextHolder.get().getEffectiveUser());
     }
 
     @PostMapping("/demo")
