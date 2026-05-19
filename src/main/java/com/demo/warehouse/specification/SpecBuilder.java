@@ -1,5 +1,8 @@
 package com.demo.warehouse.specification;
+
 import org.springframework.data.jpa.domain.Specification;
+import jakarta.persistence.criteria.Path;
+import jakarta.persistence.criteria.Root;
 
 public class SpecBuilder<T> {
     private Specification<T> specification;
@@ -12,31 +15,47 @@ public class SpecBuilder<T> {
         return new SpecBuilder<>();
     }
 
+    /**
+     * Método auxiliar mágico para resolver rutas anidadas separadas por puntos.
+     * Transforma "dress.titulo" en root.join("dress").get("titulo") de forma dinámica.
+     */
+    private <Y> Path<Y> getPath(Root<T> root, String columnPath) {
+        String[] parts = columnPath.split("\\.");
+        Path<?> path = root;
+        for (String part : parts) {
+            path = path.get(part);
+        }
+        return (Path<Y>) path;
+    }
+
     public SpecBuilder<T> like(String column, String value) {
         if (value != null && !value.isBlank()) {
             specification = specification.and((root, q, cb) -> 
-                cb.like(cb.lower(root.get(column)), "%" + value.toLowerCase() + "%"));
+                cb.like(cb.lower(getPath(root, column)), "%" + value.toLowerCase() + "%"));
         }
         return this;
     }
 
     public SpecBuilder<T> equal(String column, Object value) {
         if (value != null) {
-            specification = specification.and((root, q, cb) -> cb.equal(root.get(column), value));
+            specification = specification.and((root, q, cb) -> 
+                cb.equal(getPath(root, column), value));
         }
         return this;
     }
 
     public <V extends Comparable<? super V>> SpecBuilder<T> greater(String column, V value) {
         if (value != null) {
-            specification = specification.and((root, q, cb) -> cb.greaterThanOrEqualTo(root.get(column), value));
+            specification = specification.and((root, q, cb) -> 
+                cb.greaterThanOrEqualTo(getPath(root, column), value));
         }
         return this;
     }
 
     public <V extends Comparable<? super V>> SpecBuilder<T> smaller(String column, V value) {
         if (value != null) {
-            specification = specification.and((root, q, cb) -> cb.lessThanOrEqualTo(root.get(column), value));
+            specification = specification.and((root, q, cb) -> 
+                cb.lessThanOrEqualTo(getPath(root, column), value));
         }
         return this;
     }

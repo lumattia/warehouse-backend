@@ -1,7 +1,6 @@
 package com.demo.warehouse.mapper;
 
 import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
 
 import com.demo.warehouse.domain.Tenant;
 import com.demo.warehouse.mapper.TenantDtos.TenantResponse;

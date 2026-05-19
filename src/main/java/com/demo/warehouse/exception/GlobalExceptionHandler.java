@@ -39,7 +39,7 @@ public class GlobalExceptionHandler {
                 .timestamp(Instant.now())
                 .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
                 .error(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase())
-                .message("Unexpected error")
+                .message(ex.getMessage())
                 .path(request.getRequestURI())
                 .build());
     }
