@@ -38,8 +38,12 @@ public class SpecBuilder<T> {
 
     public SpecBuilder<T> equal(String column, Object value) {
         if (value != null) {
-            specification = specification.and((root, q, cb) -> 
-                cb.equal(getPath(root, column), value));
+            specification = specification.and((root, q, cb) -> {
+                if (value instanceof String) {
+                    return cb.equal(cb.lower(getPath(root, column)), ((String) value).toLowerCase());
+                }
+                return cb.equal(getPath(root, column), value);
+            });
         }
         return this;
     }
