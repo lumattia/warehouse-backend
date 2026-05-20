@@ -9,11 +9,15 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import org.hibernate.annotations.Check;
 
 @Getter
 @Setter
@@ -22,6 +26,7 @@ import lombok.Setter;
 @Table(name = "dresses",uniqueConstraints = {
     @UniqueConstraint(columnNames = {"sku", "tenant_id"}) // The combination must be unique
 })
+@Check(constraints = "color ~* '^#[0-9a-f]{6}$' OR color IS NULL")
 public class Dress extends TenantScopedEntity implements IdName<Long>{
 
     @Id
@@ -37,12 +42,22 @@ public class Dress extends TenantScopedEntity implements IdName<Long>{
     @Column(length = 64)
     private String size;
 
-    @Column(length = 64)
+    @Column(length = 7)
     private String color;
     @Column(nullable = false)
     private Integer stock = 0;
     @Column(precision = 10, scale = 2)
     private BigDecimal price;
+
+    @PrePersist
+    @PreUpdate
+    public void validateColor() {
+        if (color != null && !color.isEmpty()) {
+            if (!color.matches("^#[0-9A-Fa-f]{6}$")) {
+                throw new IllegalArgumentException("Color must be a valid hexadecimal color code (e.g., #FF0000)");
+            }
+        }
+    }
 
     @Override
     public String getName(){
@@ -52,15 +67,15 @@ public class Dress extends TenantScopedEntity implements IdName<Long>{
         if (quantity == null || quantity == 0) {
             throw new IllegalArgumentException("The quantity to modify must be different from zero.");
         }
-    
+
         // 2. Calculate the resulting stock
         int result = this.stock + quantity;
-    
+
         // 3. Validate that the result is not negative
         if (result < 0) {
             throw new IllegalArgumentException("Operation not allowed: Final stock cannot be negative (Current stock: " + this.stock + ")");
         }
-    
+
         this.stock = result;
     }
 }
