@@ -29,20 +29,20 @@ public class Auth0ManagementService {
     public String createUser(String email, String password) throws Exception {
         String domain = issuer.replace("https://", "").replace("/", "");
         AuthAPI auth = AuthAPI.newBuilder(domain, clientId, clientSecret).build();
-        
-        // Obtenemos token para Management API
+
+        // Get token for Management API
         TokenRequest tokenRequest = auth.requestToken(issuer + "api/v2/");
         TokenHolder holder = tokenRequest.execute().getBody();
-        
+
         ManagementAPI mgmt = ManagementAPI.newBuilder(domain, holder.getAccessToken()).build();
-        
+
         User user = new User(connection);
         user.setEmail(email);
         user.setPassword(password.toCharArray());
         user.setEmailVerified(true);
-        
+
         Response<User> response = mgmt.users().create(user).execute();
-        return response.getBody().getId(); // Retorna el Auth0 Sub (auth0|...)
+        return response.getBody().getId(); // Returns the Auth0 Sub (auth0|...)
     }
 
     public void deleteUser(String auth0Sub) {

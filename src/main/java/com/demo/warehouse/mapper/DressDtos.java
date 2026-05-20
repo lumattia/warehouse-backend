@@ -38,7 +38,7 @@ public class DressDtos {
         BigDecimal price
     ) {}
 
-    // Lo que usas para una búsqueda filtrada
+    // What you use for a filtered search
     public static record DressFilterRequest(
         String title,
         String sku,

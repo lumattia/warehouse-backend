@@ -32,7 +32,7 @@ public class TenantCleanupScheduler {
         }
 
         for (Tenant tenant : expiredTenants) {
-            // Eliminar usuarios asociados de Auth0 si tienen sub
+            // Delete associated users from Auth0 if they have sub
             List<User> users = userRepository.findByTenantId(tenant.getId());
             for (User user : users) {
                 if (user.getAuth0Sub() != null && user.getAuth0Sub().startsWith("auth0|")) {

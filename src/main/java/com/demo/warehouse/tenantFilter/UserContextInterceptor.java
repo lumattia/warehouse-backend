@@ -16,7 +16,7 @@ import org.springframework.web.servlet.HandlerInterceptor;
 
 @Component
 @RequiredArgsConstructor
-public class UserContextInterceptor implements HandlerInterceptor { // <-- Cambia la interfaz
+public class UserContextInterceptor implements HandlerInterceptor { // <-- Change the interface
 
     private final UserRepository userRepository;
 
@@ -25,7 +25,7 @@ public class UserContextInterceptor implements HandlerInterceptor { // <-- Cambi
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
         if (auth == null || !auth.isAuthenticated() || auth instanceof AnonymousAuthenticationToken) {
-            return true; // Continúa la petición de forma anónima
+            return true; // Continue the request anonymously
         }
 
         String username = auth.getName();
@@ -38,12 +38,12 @@ public class UserContextInterceptor implements HandlerInterceptor { // <-- Cambi
                 .effectiveUser(effectiveUser)
                 .build());
 
-        return true; // Permite que la petición avance al Controlador
+        return true; // Allow the request to proceed to the Controller
     }
 
     @Override
     public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) {
-        // Este es el equivalente al bloque 'finally': limpia el ThreadLocal al terminar la petición
+        // This is equivalent to a 'finally' block: clears the ThreadLocal when the request completes
         UserContextHolder.clear();
     }
 

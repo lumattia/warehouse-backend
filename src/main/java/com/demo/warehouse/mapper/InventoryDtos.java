@@ -32,7 +32,7 @@ public class InventoryDtos {
         Instant instant
     ) {}
 
-    // Lo que usas para una búsqueda filtrada
+    // What you use for a filtered search
     public record InventoryFilterRequest(
         String title,
         String sku,

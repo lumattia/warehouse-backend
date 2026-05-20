@@ -20,7 +20,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @Entity
 @Table(name = "dresses",uniqueConstraints = {
-    @UniqueConstraint(columnNames = {"sku", "tenant_id"}) // La combinación debe ser única
+    @UniqueConstraint(columnNames = {"sku", "tenant_id"}) // The combination must be unique
 })
 public class Dress extends TenantScopedEntity implements IdName<Long>{
 
@@ -50,15 +50,15 @@ public class Dress extends TenantScopedEntity implements IdName<Long>{
     }
     public void addStock(Integer quantity){
         if (quantity == null || quantity == 0) {
-            throw new IllegalArgumentException("La cantidad a modificar debe ser distinta de cero.");
+            throw new IllegalArgumentException("The quantity to modify must be different from zero.");
         }
     
-        // 2. Calcular el stock resultante
+        // 2. Calculate the resulting stock
         int result = this.stock + quantity;
     
-        // 3. Validar que el resultado no sea negativo
+        // 3. Validate that the result is not negative
         if (result < 0) {
-            throw new IllegalArgumentException("Operación no permitida: El stock final no puede ser negativo (Stock actual: " + this.stock + ")");
+            throw new IllegalArgumentException("Operation not allowed: Final stock cannot be negative (Current stock: " + this.stock + ")");
         }
     
         this.stock = result;

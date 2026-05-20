@@ -60,7 +60,7 @@ public class UserController {
         return Map.of(
             "email", email,
             "password", password,
-            "message", "¡Cuenta de Demo creada! Ahora puedes iniciar sesión con estas credenciales."
+            "message", "Demo account created! You can now log in with these credentials."
         );
     }
 
