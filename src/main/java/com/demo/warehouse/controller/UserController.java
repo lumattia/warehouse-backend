@@ -66,13 +66,6 @@ public class UserController {
         User user = registerNewUser(email, auth0Sub);
         Tenant tenant = user.getTenant();
 
-        // Set user context for tenant-scoped operations
-        com.demo.warehouse.tenantFilter.UserContext context = com.demo.warehouse.tenantFilter.UserContext.builder()
-            .realUser(user)
-            .effectiveUser(java.util.Optional.of(user))
-            .build();
-        com.demo.warehouse.tenantFilter.UserContextHolder.set(context);
-
         // Create 15 dresses
         List<Dress> createdDresses = new java.util.ArrayList<>();
         for (int i = 1; i <= 15; i++) {
@@ -83,6 +76,7 @@ public class UserController {
             dress.setColor(getRandomColor());
             dress.setStock(10 + (int)(Math.random() * 20));
             dress.setPrice(BigDecimal.valueOf(29.99 + (Math.random() * 100)));
+            dress.setTenant(tenant);
             Dress savedDress = dressRepository.save(dress);
             createdDresses.add(savedDress);
         }
@@ -94,11 +88,9 @@ public class UserController {
             inventory.setDress(randomDress);
             inventory.setQuantity(1 + (int)(Math.random() * 10));
             inventory.setInstant(Instant.now().minusSeconds((long)(Math.random() * 86400 * 30)));
+            inventory.setTenant(tenant);
             inventoryRepository.save(inventory);
         }
-
-        // Clear context after creation
-        com.demo.warehouse.tenantFilter.UserContextHolder.clear();
 
         return Map.of(
             "email", email,
