@@ -7,6 +7,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -31,16 +32,23 @@ public class InventoryController {
         return inventoryService.page(InventorySpecification.filterBy(request),pageable);
     }
 
+    @GetMapping("/{id}")
+    public Inventory detail(@PathVariable Long id) {
+        return inventoryService.detail(id);
+    }
+
     @PostMapping("/create")
     public Inventory create(@Valid @RequestBody InventoryCreateRequest request) {
         return inventoryService.create(request);
     }
+
     @PutMapping("/update")
     public Inventory update(@Valid @RequestBody InventoryUpdateRequest request) {
         return inventoryService.update(request);
     }
-    @DeleteMapping("/delete")
-    public void delete(Long toDeleteId) {
-        inventoryService.delete(toDeleteId);
+
+    @DeleteMapping("/delete/{id}")
+    public void delete(@PathVariable Long id) {
+        inventoryService.delete(id);
     }
 }

@@ -1,7 +1,6 @@
 package com.demo.warehouse.controller;
 
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.data.domain.Pageable;
@@ -11,6 +10,7 @@ import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -37,7 +37,7 @@ public class DressController {
         return dressService.list();
         }
     @GetMapping("/{id}")
-    public DressDtos.DressResponse detail(@NotNull Long id) {
+    public DressDtos.DressResponse detail(@PathVariable Long id) {
         return dressService.detail(id);
     }
 
@@ -49,8 +49,8 @@ public class DressController {
     public DressDtos.DressResponse update(@Valid @RequestBody DressDtos.DressUpdateRequest request) {
         return dressService.update(request);
     }
-    @DeleteMapping("/delete")
-    public void delete(@NotNull Long toDeleteId) {
-        dressService.delete(toDeleteId);
+    @DeleteMapping("/delete/{id}")
+    public void delete(@PathVariable Long id) {
+        dressService.delete(id);
     }
 }

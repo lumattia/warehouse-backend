@@ -1,11 +1,15 @@
 package com.demo.warehouse.controller;
 
+import com.demo.warehouse.domain.Dress;
+import com.demo.warehouse.domain.Inventory;
 import com.demo.warehouse.domain.ModuleType;
 import com.demo.warehouse.domain.Tenant;
 import com.demo.warehouse.domain.User;
 import com.demo.warehouse.domain.UserRole;
 import com.demo.warehouse.mapper.UserDto;
 import com.demo.warehouse.mapper.UserMapper;
+import com.demo.warehouse.repository.DressRepository;
+import com.demo.warehouse.repository.InventoryRepository;
 import com.demo.warehouse.repository.TenantRepository;
 import com.demo.warehouse.repository.UserRepository;
 import com.demo.warehouse.service.Auth0ManagementService;
@@ -27,6 +31,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -39,6 +45,8 @@ public class UserController {
 
     private final UserRepository userRepository;
     private final TenantRepository tenantRepository;
+    private final DressRepository dressRepository;
+    private final InventoryRepository inventoryRepository;
     private final Auth0ManagementService auth0ManagementService;
     private final UserMapper userMapper;
     private final UserService userService;
@@ -53,10 +61,45 @@ public class UserController {
         String randomId = UUID.randomUUID().toString().substring(0, 8);
         String email = "demo_" + randomId + "@example.com";
         String password = "Demo" + randomId + "!";
-        
+
         String auth0Sub = auth0ManagementService.createUser(email, password);
-        registerNewUser(email, auth0Sub);
-        
+        User user = registerNewUser(email, auth0Sub);
+        Tenant tenant = user.getTenant();
+
+        // Set user context for tenant-scoped operations
+        com.demo.warehouse.tenantFilter.UserContext context = com.demo.warehouse.tenantFilter.UserContext.builder()
+            .realUser(user)
+            .effectiveUser(java.util.Optional.of(user))
+            .build();
+        com.demo.warehouse.tenantFilter.UserContextHolder.set(context);
+
+        // Create 15 dresses
+        List<Dress> createdDresses = new java.util.ArrayList<>();
+        for (int i = 1; i <= 15; i++) {
+            Dress dress = new Dress();
+            dress.setTitle("Demo Dress " + i);
+            dress.setSku("SKU-" + randomId + "-" + String.format("%03d", i));
+            dress.setSize(getRandomSize());
+            dress.setColor(getRandomColor());
+            dress.setStock(10 + (int)(Math.random() * 20));
+            dress.setPrice(BigDecimal.valueOf(29.99 + (Math.random() * 100)));
+            Dress savedDress = dressRepository.save(dress);
+            createdDresses.add(savedDress);
+        }
+
+        // Create 25 inventory items
+        for (int i = 0; i < 25; i++) {
+            Inventory inventory = new Inventory();
+            Dress randomDress = createdDresses.get((int)(Math.random() * createdDresses.size()));
+            inventory.setDress(randomDress);
+            inventory.setQuantity(1 + (int)(Math.random() * 10));
+            inventory.setInstant(Instant.now().minusSeconds((long)(Math.random() * 86400 * 30)));
+            inventoryRepository.save(inventory);
+        }
+
+        // Clear context after creation
+        com.demo.warehouse.tenantFilter.UserContextHolder.clear();
+
         return Map.of(
             "email", email,
             "password", password,
@@ -112,7 +155,7 @@ public class UserController {
     private Specification<User> buildSpecification(UserDto.UserFilterRequest filter) {
         return (root, query, cb) -> {
             var predicates = new java.util.ArrayList<jakarta.persistence.criteria.Predicate>();
-            
+
             if (filter != null) {
                 if (filter.username() != null && !filter.username().isEmpty()) {
                     predicates.add(cb.like(cb.lower(root.get("username")), "%" + filter.username().toLowerCase() + "%"));
@@ -121,8 +164,18 @@ public class UserController {
                     predicates.add(cb.equal(root.get("role"), filter.role()));
                 }
             }
-            
+
             return cb.and(predicates.toArray(new jakarta.persistence.criteria.Predicate[0]));
         };
+    }
+
+    private String getRandomSize() {
+        String[] sizes = {"XS", "S", "M", "L", "XL", "XXL"};
+        return sizes[(int)(Math.random() * sizes.length)];
+    }
+
+    private String getRandomColor() {
+        // Generate random hex color
+        return String.format("#%06x", (int)(Math.random() * 0xFFFFFF));
     }
 }

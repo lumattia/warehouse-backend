@@ -11,18 +11,26 @@ import org.springframework.transaction.annotation.Transactional;
 import com.demo.warehouse.domain.Inventory;
 import com.demo.warehouse.mapper.InventoryDtos.InventoryCreateRequest;
 import com.demo.warehouse.mapper.InventoryDtos.InventoryUpdateRequest;
+import com.demo.warehouse.mapper.IdName;
 import com.demo.warehouse.repository.DressRepository;
 import com.demo.warehouse.repository.InventoryRepository;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class InventoryService {
     private final InventoryRepository inventoryRepository;
     private final DressRepository dressRepository;
-    
+
     @Transactional(readOnly = true)
     public Page<Inventory> page(Specification<Inventory> spec, Pageable pageable) {
         return inventoryRepository.getBySpec(spec, pageable);
+    }
+
+    @Transactional(readOnly = true)
+    public Inventory detail(Long id) {
+        return inventoryRepository.getByIdOrThrow(id);
     }
 
     @Transactional
@@ -46,7 +54,7 @@ public class InventoryService {
         inventory.setInstant(request.instant());
         return inventoryRepository.save(inventory);
     }
-    
+
     @Transactional
     public void delete(Long toDeleteId) {
         var inventory = inventoryRepository.getByIdOrThrow(toDeleteId);
