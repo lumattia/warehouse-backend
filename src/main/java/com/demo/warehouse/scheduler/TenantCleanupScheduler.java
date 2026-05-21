@@ -24,7 +24,7 @@ public class TenantCleanupScheduler {
     private final Auth0ManagementService auth0ManagementService;
 
     @Transactional
-    @Scheduled(cron = "0 0 * * * *")
+    @Scheduled(cron = "0 * * * * *")
     public void cleanupExpiredTenants() {
         List<Tenant> expiredTenants = tenantRepository.findByExpiresAtBefore(Instant.now());
         if (expiredTenants.isEmpty()) {

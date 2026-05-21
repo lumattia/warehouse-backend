@@ -1,7 +1,7 @@
 package com.demo.warehouse.controller;
 
 import com.demo.warehouse.domain.Dress;
-import com.demo.warehouse.domain.Inventory;
+import com.demo.warehouse.domain.DressMovement;
 import com.demo.warehouse.domain.ModuleType;
 import com.demo.warehouse.domain.Tenant;
 import com.demo.warehouse.domain.User;
@@ -9,7 +9,7 @@ import com.demo.warehouse.domain.UserRole;
 import com.demo.warehouse.mapper.UserDto;
 import com.demo.warehouse.mapper.UserMapper;
 import com.demo.warehouse.repository.DressRepository;
-import com.demo.warehouse.repository.InventoryRepository;
+import com.demo.warehouse.repository.DressMovementRepository;
 import com.demo.warehouse.repository.TenantRepository;
 import com.demo.warehouse.repository.UserRepository;
 import com.demo.warehouse.service.Auth0ManagementService;
@@ -46,7 +46,7 @@ public class UserController {
     private final UserRepository userRepository;
     private final TenantRepository tenantRepository;
     private final DressRepository dressRepository;
-    private final InventoryRepository inventoryRepository;
+    private final DressMovementRepository dressMovementRepository;
     private final Auth0ManagementService auth0ManagementService;
     private final UserMapper userMapper;
     private final UserService userService;
@@ -81,15 +81,15 @@ public class UserController {
             createdDresses.add(savedDress);
         }
 
-        // Create 25 inventory items
+        // Create 25 dress movement items
         for (int i = 0; i < 25; i++) {
-            Inventory inventory = new Inventory();
+            DressMovement dressMovement = new DressMovement();
             Dress randomDress = createdDresses.get((int)(Math.random() * createdDresses.size()));
-            inventory.setDress(randomDress);
-            inventory.setQuantity(1 + (int)(Math.random() * 10));
-            inventory.setInstant(Instant.now().minusSeconds((long)(Math.random() * 86400 * 30)));
-            inventory.setTenant(tenant);
-            inventoryRepository.save(inventory);
+            dressMovement.setDress(randomDress);
+            dressMovement.setQuantity(1 + (int)(Math.random() * 10));
+            dressMovement.setInstant(Instant.now().minusSeconds((long)(Math.random() * 86400 * 30)));
+            dressMovement.setTenant(tenant);
+            dressMovementRepository.save(dressMovement);
         }
 
         return Map.of(

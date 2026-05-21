@@ -21,8 +21,8 @@ import org.hibernate.annotations.OnDeleteAction;
 @Setter
 @NoArgsConstructor
 @Entity
-@Table(name = "inventory")
-public class Inventory extends TenantScopedEntity {
+@Table(name = "dress_movement")
+public class DressMovement extends TenantScopedEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

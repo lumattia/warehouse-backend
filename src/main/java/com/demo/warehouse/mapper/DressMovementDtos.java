@@ -5,23 +5,23 @@ import java.time.Instant;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
-public class InventoryDtos {
+public class DressMovementDtos {
     
-    public record InventoryCreateRequest(
+    public record DressMovementCreateRequest(
         @NotNull
         Long dressId,
         @NotNull
         Integer quantity,
         Instant instant
     ) {
-        public InventoryCreateRequest {
+        public DressMovementCreateRequest {
             if (instant == null) {
                 instant = Instant.now();
             }
         }
     }
 
-    public record InventoryUpdateRequest(
+    public record DressMovementUpdateRequest(
         @NotNull
         Long id,
         @NotNull
@@ -33,7 +33,7 @@ public class InventoryDtos {
     ) {}
 
     // What you use for a filtered search
-    public record InventoryFilterRequest(
+    public record DressMovementFilterRequest(
         String title,
         String sku,
         String color,

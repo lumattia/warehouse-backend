@@ -1,12 +1,12 @@
 package com.demo.warehouse.specification;
 import org.springframework.data.jpa.domain.Specification;
 
-import com.demo.warehouse.domain.Inventory;
-import com.demo.warehouse.mapper.InventoryDtos.InventoryFilterRequest;
+import com.demo.warehouse.domain.DressMovement;
+import com.demo.warehouse.mapper.DressMovementDtos.DressMovementFilterRequest;
 
-public class InventorySpecification {
-    public static Specification<Inventory> filterBy(InventoryFilterRequest filters) {
-        return SpecBuilder.repo(Inventory.class)
+public class DressMovementSpecification {
+    public static Specification<DressMovement> filterBy(DressMovementFilterRequest filters) {
+        return SpecBuilder.repo(DressMovement.class)
         .like("dress.title", filters.title())
         .like("dress.sku", filters.sku())
         .equal("dress.color", filters.color())
