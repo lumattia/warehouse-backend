@@ -13,8 +13,8 @@ public class DressSpecification {
         .equal("size", filters.size())
         .greater("price", filters.minPrice())
         .smaller("price", filters.maxPrice())
-        .greater("stock", filters.minPrice())
-        .smaller("stock", filters.maxPrice())
+        .greater("stock", filters.minStock())
+        .smaller("stock", filters.maxStock())
         .build();
     }
 }

@@ -7,7 +7,7 @@ import com.demo.warehouse.mapper.InventoryDtos.InventoryFilterRequest;
 public class InventorySpecification {
     public static Specification<Inventory> filterBy(InventoryFilterRequest filters) {
         return SpecBuilder.repo(Inventory.class)
-        .like("dress.titulo", filters.title())
+        .like("dress.title", filters.title())
         .like("dress.sku", filters.sku())
         .equal("dress.color", filters.color())
         .equal("dress.size", filters.size())

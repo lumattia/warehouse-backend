@@ -35,7 +35,7 @@ public class DressController {
     @GetMapping("/list")
     public List<IdName<Long>> list() {
         return dressService.list();
-        }
+    }
     @GetMapping("/{id}")
     public DressDtos.DressResponse detail(@PathVariable Long id) {
         return dressService.detail(id);
