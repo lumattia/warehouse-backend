@@ -19,7 +19,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -130,7 +129,6 @@ class TenantIsolationIntegrationTest {
         // Arrange
         var context = UserContext.builder()
                 .realUser(user1)
-                .effectiveUser(Optional.empty())
                 .build();
         UserContextHolder.set(context);
 
@@ -150,7 +148,6 @@ class TenantIsolationIntegrationTest {
         // Arrange
         var context = UserContext.builder()
                 .realUser(user2)
-                .effectiveUser(Optional.empty())
                 .build();
         UserContextHolder.set(context);
 
@@ -170,7 +167,6 @@ class TenantIsolationIntegrationTest {
         // Arrange
         var context = UserContext.builder()
                 .realUser(user1)
-                .effectiveUser(Optional.empty())
                 .build();
         UserContextHolder.set(context);
 
@@ -203,7 +199,6 @@ class TenantIsolationIntegrationTest {
         // Arrange
         var context = UserContext.builder()
                 .realUser(user1)
-                .effectiveUser(Optional.empty())
                 .build();
         UserContextHolder.set(context);
 
@@ -234,7 +229,6 @@ class TenantIsolationIntegrationTest {
         // Arrange
         var context = UserContext.builder()
                 .realUser(user1)
-                .effectiveUser(Optional.empty())
                 .build();
         UserContextHolder.set(context);
 

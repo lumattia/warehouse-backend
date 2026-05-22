@@ -32,10 +32,8 @@ public class UserContextInterceptor implements HandlerInterceptor { // <-- Chang
         User realUser = userRepository.findByAuth0Sub(username)
                 .orElseThrow(() -> new RuntimeException("User not found: " + username));
 
-        Optional<User> effectiveUser = resolveEffectiveUser(realUser);
         UserContextHolder.set(UserContext.builder()
                 .realUser(realUser)
-                .effectiveUser(effectiveUser)
                 .build());
 
         return true; // Allow the request to proceed to the Controller
@@ -45,14 +43,5 @@ public class UserContextInterceptor implements HandlerInterceptor { // <-- Chang
     public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) {
         // This is equivalent to a 'finally' block: clears the ThreadLocal when the request completes
         UserContextHolder.clear();
-    }
-
-    private Optional<User> resolveEffectiveUser(User realUser) {
-        Long activeUserContextId = realUser.getActiveUserContextId();
-        if (activeUserContextId == null || activeUserContextId.equals(realUser.getId())) {
-            return Optional.empty();
-        }
-        return userRepository.findById(activeUserContextId)
-                .filter(effective -> effective.getTenant().getId().equals(realUser.getTenant().getId()));
     }
 }

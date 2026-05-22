@@ -108,8 +108,7 @@ class MultiTenantSecurityFilterTest {
         assertTrue(result);
         var context = UserContextHolder.get();
         assertNotNull(context);
-        assertEquals(user, context.getRealUser());
-        assertEquals(user, context.getEffectiveUser());
+        assertEquals(user, context.getUser());
     }
 
     @Test
@@ -137,8 +136,7 @@ class MultiTenantSecurityFilterTest {
         assertTrue(result);
         var context = UserContextHolder.get();
         assertNotNull(context);
-        assertEquals(user, context.getRealUser());
-        assertEquals(effectiveUser, context.getEffectiveUser());
+        assertEquals(user, context.getUser());
     }
 
     @Test
@@ -170,8 +168,7 @@ class MultiTenantSecurityFilterTest {
         assertTrue(result);
         var context = UserContextHolder.get();
         assertNotNull(context);
-        assertEquals(user, context.getRealUser());
-        assertEquals(user, context.getEffectiveUser());
+        assertEquals(user, context.getUser());
     }
 
     @Test

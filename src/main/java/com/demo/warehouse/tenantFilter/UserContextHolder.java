@@ -22,7 +22,7 @@ public final class UserContextHolder {
         if (context == null) {
             throw new NullPointerException("User context not set. Cannot determine tenant.");
         }
-        return context.getEffectiveUser().getTenant();
+        return context.getUser().getTenant();
     }
     public static UUID getTenantId() {
         return getTenant().getId();

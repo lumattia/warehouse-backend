@@ -53,7 +53,13 @@ public class UserController {
 
     @GetMapping("/me")
     public UserDto.LoggedUserDto getCurrentUser(@AuthenticationPrincipal Jwt jwt) {
-        return userMapper.toLogged(UserContextHolder.get().getEffectiveUser());
+        return userMapper.toLogged(UserContextHolder.get().getUser());
+    }
+
+    @PostMapping("/switch-tenant")
+    public UserDto.LoggedUserDto switchTenant(@RequestBody Map<String, UUID> request) {
+        UUID tenantId = request.get("tenantId");
+        return userService.switchTenant(tenantId);
     }
 
     @PostMapping("/demo")
@@ -101,32 +107,56 @@ public class UserController {
 
     @GetMapping("/page")
     public Page<UserDto.UserResponse> page(UserDto.UserFilterRequest filter, Pageable pageable) {
+        User currentUser = UserContextHolder.get().getUser();
+        if (currentUser.getRole() == UserRole.USER) {
+            throw new RuntimeException("USER cannot manage users");
+        }
         Specification<User> spec = buildSpecification(filter);
         return userService.page(spec, pageable);
     }
 
     @GetMapping("/list")
     public List<com.demo.warehouse.mapper.IdName<Long>> list() {
+        User currentUser = UserContextHolder.get().getUser();
+        if (currentUser.getRole() == UserRole.USER) {
+            throw new RuntimeException("USER cannot manage users");
+        }
         return userService.list();
     }
 
     @GetMapping("/{id}")
     public UserDto.UserResponse detail(@PathVariable Long id) {
+        User currentUser = UserContextHolder.get().getUser();
+        if (currentUser.getRole() == UserRole.USER && !currentUser.getId().equals(id)) {
+            throw new RuntimeException("USER can only view their own profile");
+        }
         return userService.detail(id);
     }
 
     @PostMapping("/create")
     public UserDto.UserResponse create(@RequestBody UserDto.UserCreateRequest request) {
+        User currentUser = UserContextHolder.get().getUser();
+        if (currentUser.getRole() == UserRole.USER) {
+            throw new RuntimeException("USER cannot create users");
+        }
         return userService.create(request);
     }
 
     @PutMapping("/update/{id}")
     public UserDto.UserResponse update(@PathVariable Long id, @RequestBody UserDto.UserUpdateRequest request) {
+        User currentUser = UserContextHolder.get().getUser();
+        if (currentUser.getRole() == UserRole.USER && !currentUser.getId().equals(id)) {
+            throw new RuntimeException("USER can only update their own profile");
+        }
         return userService.update(request);
     }
 
     @DeleteMapping("/delete/{id}")
     public void delete(@PathVariable Long id) {
+        User currentUser = UserContextHolder.get().getUser();
+        if (currentUser.getRole() == UserRole.USER) {
+            throw new RuntimeException("USER cannot delete users");
+        }
         userService.delete(id);
     }
 
