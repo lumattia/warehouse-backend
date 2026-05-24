@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.demo.warehouse.domain.TenantScopedEntity;
 import com.demo.warehouse.mapper.IdName;
+import com.demo.warehouse.mapper.IdNameImpl;
 import com.demo.warehouse.tenantFilter.UserContextHolder;
 
 public class BaseRepositoryImpl<T extends TenantScopedEntity, ID> extends SimpleJpaRepository<T, ID> implements BaseRepository<T, ID> {
@@ -139,7 +140,7 @@ public class BaseRepositoryImpl<T extends TenantScopedEntity, ID> extends Simple
     @SuppressWarnings({ "unchecked" })
     public List<IdName<ID>> getAllAsIdName() {
         var cb = entityManager.getCriteriaBuilder();
-        var cq = cb.createQuery(entityInformation.getJavaType());
+        var cq = cb.createQuery(IdNameImpl.class);
         var root = cq.from(entityInformation.getJavaType());
 
         cq.multiselect(root.get("id"), root.get("name"));

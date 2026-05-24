@@ -2,5 +2,5 @@ package com.demo.warehouse.domain;
 
 public enum ModuleType {
     DRESS,
-    INVENTORY
+    DRESS_MOVEMENT
 }

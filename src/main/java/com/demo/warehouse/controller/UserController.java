@@ -146,7 +146,7 @@ public class UserController {
     private User registerNewUser(String username, String auth0Sub) {
         Tenant tenant = new Tenant();
         tenant.setName("Demo " + UUID.randomUUID().toString().substring(0, 8));
-        tenant.setModules(Set.of(ModuleType.DRESS, ModuleType.INVENTORY));
+        tenant.setModules(Set.of(ModuleType.DRESS, ModuleType.DRESS_MOVEMENT));
         tenant = tenantRepository.save(tenant);
 
         User user = new User(null, username, null, auth0Sub, UserRole.RESELLER, Set.of(tenant));

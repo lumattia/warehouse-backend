@@ -29,7 +29,7 @@ class SecurityServiceTest {
         testTenant = new Tenant();
         testTenant.setId(UUID.randomUUID());
         testTenant.setName("Test Tenant");
-        testTenant.setModules(Set.of(ModuleType.DRESS, ModuleType.INVENTORY));
+        testTenant.setModules(Set.of(ModuleType.DRESS, ModuleType.DRESS_MOVEMENT));
         
         testUser = new User();
         testUser.setId(1L);
@@ -91,9 +91,9 @@ class SecurityServiceTest {
 
     @Test
     void hasModule_shouldReturnTrueWhenTenantHasModule() {
-        testTenant.setModules(Set.of(ModuleType.DRESS, ModuleType.INVENTORY));
+        testTenant.setModules(Set.of(ModuleType.DRESS, ModuleType.DRESS_MOVEMENT));
         assertTrue(securityService.hasModule("DRESS"));
-        assertTrue(securityService.hasModule("INVENTORY"));
+        assertTrue(securityService.hasModule("DRESS_MOVEMENT"));
         assertFalse(securityService.hasModule("USER"));
     }
 
@@ -101,7 +101,7 @@ class SecurityServiceTest {
     void hasModule_shouldReturnFalseWhenTenantDoesNotHaveModule() {
         testTenant.setModules(Set.of(ModuleType.DRESS));
         assertTrue(securityService.hasModule("DRESS"));
-        assertFalse(securityService.hasModule("INVENTORY"));
+        assertFalse(securityService.hasModule("DRESS_MOVEMENT"));
         assertFalse(securityService.hasModule("USER"));
     }
 

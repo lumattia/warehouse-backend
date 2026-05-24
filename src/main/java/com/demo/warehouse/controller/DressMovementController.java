@@ -25,7 +25,7 @@ import com.demo.warehouse.specification.DressMovementSpecification;
 @RestController
 @RequestMapping("/dress-movements")
 @RequiredArgsConstructor
-@PreAuthorize("@securityService.hasModule('INVENTORY')")
+@PreAuthorize("@securityService.hasModule('DRESS_MOVEMENT')")
 public class DressMovementController {
     private final DressMovementService dressMovementService;
 
