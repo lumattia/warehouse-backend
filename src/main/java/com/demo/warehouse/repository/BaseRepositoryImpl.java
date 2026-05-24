@@ -142,37 +142,13 @@ public class BaseRepositoryImpl<T extends TenantScopedEntity, ID> extends Simple
         var cq = cb.createQuery(entityInformation.getJavaType());
         var root = cq.from(entityInformation.getJavaType());
 
-        cq.select(root);
+        cq.multiselect(root.get("id"), root.get("name"));
 
         if (TenantScopedEntity.class.isAssignableFrom(entityInformation.getJavaType())) {
             cq.where(cb.equal(root.get("tenant").get("id"), getCurrentTenantId()));
         }
-
-        var entities = entityManager.createQuery(cq).getResultList();
-
-        List<IdName<ID>> result = new java.util.ArrayList<>();
-        for (var e : entities) {
-            final ID id = (ID) entityManager.getEntityManagerFactory().getPersistenceUnitUtil().getIdentifier(e);
-            String tempName;
-            try {
-                tempName = (String) e.getClass().getMethod("getName").invoke(e);
-            } catch (Exception ex) {
-                tempName = e.toString();
-            }
-            final String name = tempName;
-            result.add(new IdName<ID>() {
-                @Override
-                public ID getId() {
-                    return id;
-                }
-
-                @Override
-                public String getName() {
-                    return name;
-                }
-            });
-        }
-        return result;
+        cq.orderBy(cb.asc(root.get("name")));
+        return (List<IdName<ID>>) (List<?>) entityManager.createQuery(cq).getResultList();
     }
 
     @Override

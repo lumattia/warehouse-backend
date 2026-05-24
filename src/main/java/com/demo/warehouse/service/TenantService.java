@@ -20,6 +20,7 @@ import com.demo.warehouse.mapper.IdNameImpl;
 import com.demo.warehouse.mapper.TenantDtos;
 import com.demo.warehouse.mapper.TenantMapper;
 import com.demo.warehouse.repository.TenantRepository;
+import com.demo.warehouse.repository.UserRepository;
 import com.demo.warehouse.tenantFilter.UserContextHolder;
 
 @Service
@@ -28,6 +29,7 @@ public class TenantService {
 
     private final TenantMapper tenantMapper;
     private final TenantRepository tenantRepository;
+    private final UserRepository userRepository;
 
     @Transactional(readOnly = true)
     public Page<TenantDtos.TenantResponse> page(@NonNull Pageable pageable) {
@@ -62,31 +64,15 @@ public class TenantService {
             // RESELLER solo ve sus allowedTenants
             return currentUser.getAllowedTenants().stream()
                 .map(tenant -> {
-                    IdNameImpl<UUID> idName = new IdNameImpl<>();
-                    idName.setId(tenant.getId());
-                    idName.setName(tenant.getName());
+                    IdNameImpl<UUID> idName = new IdNameImpl<>(tenant.getId(), tenant.getName());
                     return (IdName<UUID>) idName;
                 })
+                .sorted((a, b) -> a.getName().compareTo(b.getName()))
                 .toList();
         }
 
-        if (currentUser.getRole() == UserRole.ADMIN) {
-            // ADMIN solo ve su propio tenant
-            IdNameImpl<UUID> idName = new IdNameImpl<>();
-            idName.setId(currentUser.getTenant().getId());
-            idName.setName(currentUser.getTenant().getName());
-            return List.of((IdName<UUID>) idName);
-        }
-
         // SUPERADMIN ve todos
-        return tenantRepository.findAll().stream()
-            .map(tenant -> {
-                IdNameImpl<UUID> idName = new IdNameImpl<>();
-                idName.setId(tenant.getId());
-                idName.setName(tenant.getName());
-                return (IdName<UUID>) idName;
-            })
-            .toList();
+        return tenantRepository.listByIdName();
     }
 
     @Transactional(readOnly = true)
@@ -117,7 +103,16 @@ public class TenantService {
         var tenant = new Tenant();
         tenant.setName(request.name());
         tenant.setModules(request.modules());
-        return tenantMapper.toResponse(tenantRepository.save(tenant));
+        tenant = tenantRepository.save(tenant);
+
+        // If current user is RESELLER, add the tenant to their allowedTenants
+        User currentUser = UserContextHolder.get().getUser();
+        if (currentUser.getRole() == UserRole.RESELLER) {
+            currentUser.getAllowedTenants().add(tenant);
+            userRepository.save(currentUser);
+        }
+
+        return tenantMapper.toResponse(tenant);
     }
 
     @Transactional

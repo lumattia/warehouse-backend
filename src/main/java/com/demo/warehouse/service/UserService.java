@@ -107,7 +107,8 @@ public class UserService {
 
         // RESELLER can only change to tenants in their allowedTenants
         if (currentUser.getRole() == UserRole.RESELLER) {
-            if (!currentUser.getAllowedTenants().contains(targetTenant)) {
+            if (!currentUser.getAllowedTenants().stream()
+                .anyMatch(tenant -> tenant.getId().equals(tenantId))) {
                 throw new RuntimeException("Tenant not allowed for this RESELLER");
             }
             currentUser.setTenant(targetTenant);

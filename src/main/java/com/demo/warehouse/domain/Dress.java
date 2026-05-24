@@ -18,7 +18,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import org.hibernate.annotations.Check;
-
+import org.hibernate.annotations.Formula;
 @Getter
 @Setter
 @NoArgsConstructor
@@ -38,7 +38,8 @@ public class Dress extends TenantScopedEntity implements IdName<Long>{
 
     @Column(nullable = false, length = 64)
     private String sku;
-
+    @Formula("sku")
+    private String name;
     @Column(length = 64)
     private String size;
 
@@ -57,11 +58,6 @@ public class Dress extends TenantScopedEntity implements IdName<Long>{
                 throw new IllegalArgumentException("Color must be a valid hexadecimal color code (e.g., #FF0000)");
             }
         }
-    }
-
-    @Override
-    public String getName(){
-        return this.sku;
     }
     public void addStock(Integer quantity){
         if (quantity == null || quantity == 0) {

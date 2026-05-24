@@ -5,9 +5,14 @@ import java.util.List;
 import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Query;
 
 import com.demo.warehouse.domain.Tenant;
+import com.demo.warehouse.mapper.IdName;
 
 public interface TenantRepository extends JpaRepository<Tenant, UUID>, JpaSpecificationExecutor<Tenant> {
     List<Tenant> findByExpiresAtBefore(Instant now);
+
+    @Query("SELECT t.id as id, t.name as name FROM Tenant t order by t.name")
+    List<IdName<UUID>> listByIdName();
 }
