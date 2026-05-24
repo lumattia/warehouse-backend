@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -24,6 +25,7 @@ import com.demo.warehouse.specification.DressMovementSpecification;
 @RestController
 @RequestMapping("/dress-movements")
 @RequiredArgsConstructor
+@PreAuthorize("@securityService.hasModule('INVENTORY')")
 public class DressMovementController {
     private final DressMovementService dressMovementService;
 

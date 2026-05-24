@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 import java.util.List;
 
@@ -25,6 +26,7 @@ import com.demo.warehouse.specification.DressSpecification;
 @RestController
 @RequestMapping("/dresses")
 @RequiredArgsConstructor
+@PreAuthorize("@securityService.hasModule('DRESS')")
 public class DressController {
     private final DressService dressService;
 
@@ -42,14 +44,17 @@ public class DressController {
     }
 
     @PostMapping("/create")
+    @PreAuthorize("@securityService.isAtLeast('ADMIN')")
     public DressDtos.DressResponse create(@Valid @RequestBody DressDtos.DressCreateRequest request) {
         return dressService.create(request);
     }
     @PutMapping("/update")
+    @PreAuthorize("@securityService.isAtLeast('ADMIN')")
     public DressDtos.DressResponse update(@Valid @RequestBody DressDtos.DressUpdateRequest request) {
         return dressService.update(request);
     }
     @DeleteMapping("/delete/{id}")
+    @PreAuthorize("@securityService.isAtLeast('ADMIN')")
     public void delete(@PathVariable Long id) {
         dressService.delete(id);
     }

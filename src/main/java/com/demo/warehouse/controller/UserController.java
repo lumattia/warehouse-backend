@@ -20,6 +20,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -54,12 +55,6 @@ public class UserController {
     @GetMapping("/me")
     public UserDto.LoggedUserDto getCurrentUser(@AuthenticationPrincipal Jwt jwt) {
         return userMapper.toLogged(UserContextHolder.get().getUser());
-    }
-
-    @PostMapping("/switch-tenant")
-    public UserDto.LoggedUserDto switchTenant(@RequestBody Map<String, UUID> request) {
-        UUID tenantId = request.get("tenantId");
-        return userService.switchTenant(tenantId);
     }
 
     @PostMapping("/demo")
@@ -106,21 +101,15 @@ public class UserController {
     }
 
     @GetMapping("/page")
+    @PreAuthorize("@securityService.isAtLeast('ADMIN')")
     public Page<UserDto.UserResponse> page(UserDto.UserFilterRequest filter, Pageable pageable) {
-        User currentUser = UserContextHolder.get().getUser();
-        if (currentUser.getRole() == UserRole.USER) {
-            throw new RuntimeException("USER cannot manage users");
-        }
         Specification<User> spec = buildSpecification(filter);
         return userService.page(spec, pageable);
     }
 
     @GetMapping("/list")
+    @PreAuthorize("@securityService.isAtLeast('ADMIN')")
     public List<com.demo.warehouse.mapper.IdName<Long>> list() {
-        User currentUser = UserContextHolder.get().getUser();
-        if (currentUser.getRole() == UserRole.USER) {
-            throw new RuntimeException("USER cannot manage users");
-        }
         return userService.list();
     }
 
@@ -134,11 +123,8 @@ public class UserController {
     }
 
     @PostMapping("/create")
+    @PreAuthorize("@securityService.isAtLeast('ADMIN')")
     public UserDto.UserResponse create(@RequestBody UserDto.UserCreateRequest request) {
-        User currentUser = UserContextHolder.get().getUser();
-        if (currentUser.getRole() == UserRole.USER) {
-            throw new RuntimeException("USER cannot create users");
-        }
         return userService.create(request);
     }
 
@@ -152,11 +138,8 @@ public class UserController {
     }
 
     @DeleteMapping("/delete/{id}")
+    @PreAuthorize("@securityService.isAtLeast('ADMIN')")
     public void delete(@PathVariable Long id) {
-        User currentUser = UserContextHolder.get().getUser();
-        if (currentUser.getRole() == UserRole.USER) {
-            throw new RuntimeException("USER cannot delete users");
-        }
         userService.delete(id);
     }
 
@@ -170,7 +153,8 @@ public class UserController {
         user.setUsername(username);
         user.setAuth0Sub(auth0Sub);
         user.setTenant(tenant);
-        user.setRole(UserRole.ADMIN);
+        user.setRole(UserRole.RESELLER);
+        user.setAllowedTenants(Set.of(tenant));
         return userRepository.save(user);
     }
 
