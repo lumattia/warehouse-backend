@@ -149,12 +149,8 @@ public class UserController {
         tenant.setModules(Set.of(ModuleType.DRESS, ModuleType.INVENTORY));
         tenant = tenantRepository.save(tenant);
 
-        User user = new User();
-        user.setUsername(username);
-        user.setAuth0Sub(auth0Sub);
+        User user = new User(null, username, null, auth0Sub, UserRole.RESELLER, Set.of(tenant));
         user.setTenant(tenant);
-        user.setRole(UserRole.RESELLER);
-        user.setAllowedTenants(Set.of(tenant));
         return userRepository.save(user);
     }
 

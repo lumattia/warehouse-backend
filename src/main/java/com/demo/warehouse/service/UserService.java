@@ -32,7 +32,7 @@ public class UserService {
 
     @Transactional(readOnly = true)
     public Page<UserDto.UserResponse> page(Specification<User> spec, @NonNull Pageable pageable) {
-        return userRepository.getBySpec(spec, pageable).map(userMapper::toResponseWithTenants);
+        return userRepository.getBySpec(spec, pageable).map(userMapper::toResponse);
     }
     
     @Transactional(readOnly = true)
@@ -44,17 +44,15 @@ public class UserService {
     public UserDto.UserResponse detail(Long id) {
         var user = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("User not found"));
-        return userMapper.toResponseWithTenants(user);
+        return userMapper.toResponse(user);
     }
 
     @Transactional
     public UserDto.UserResponse create(UserDto.UserCreateRequest request) {
-        User currentUser = UserContextHolder.get().getUser();
-        validateRoleAssignment(currentUser.getRole(), request.role());
-
         var user = new User();
         user.setUsername(request.username());
         user.setRole(request.role());
+        // User.validateCanModifyUser(user); not needed because if it pass setRole in creation it should pass validateCanModifyUser
 
         if (request.allowedTenantIds() != null && !request.allowedTenantIds().isEmpty()) {
             Set<com.demo.warehouse.domain.Tenant> tenants = tenantRepository.findAllById(request.allowedTenantIds())
@@ -63,15 +61,14 @@ public class UserService {
             user.setAllowedTenants(tenants);
         }
 
-        return userMapper.toResponseWithTenants(userRepository.save(user));
+        return userMapper.toResponse(userRepository.save(user));
     }
 
     @Transactional
     public UserDto.UserResponse update(UserDto.UserUpdateRequest request) {
-        User currentUser = UserContextHolder.get().getUser();
-        validateRoleAssignment(currentUser.getRole(), request.role());
-
         var user = userRepository.getByIdOrThrow(request.id());
+        User.validateCanModifyUser(user);
+
         user.setUsername(request.username());
         user.setRole(request.role());
 
@@ -83,12 +80,14 @@ public class UserService {
         }
 
         userRepository.save(user);
-        return userMapper.toResponseWithTenants(user);
+        return userMapper.toResponse(user);
     }
     
     @Transactional
     public void delete(Long toDeleteId) {
-        userRepository.deleteById(toDeleteId);
+        var user = userRepository.getByIdOrThrow(toDeleteId);
+        User.validateCanModifyUser(user);
+        userRepository.delete(user);
     }
 
     @Transactional
@@ -117,27 +116,5 @@ public class UserService {
         }
 
         throw new RuntimeException("Only SUPERADMIN and RESELLER can switch tenants");
-    }
-
-    private void validateRoleAssignment(UserRole currentRole, UserRole targetRole) {
-        switch (currentRole) {
-            case SUPERADMIN:
-                // SUPERADMIN can assign any role
-                break;
-            case RESELLER:
-                // RESELLER can only assign ADMIN or USER
-                if (targetRole == UserRole.RESELLER || targetRole == UserRole.SUPERADMIN) {
-                    throw new RuntimeException("RESELLER can only assign ADMIN or USER roles");
-                }
-                break;
-            case ADMIN:
-                // ADMIN solo puede asignar ADMIN o USER
-                if (targetRole == UserRole.RESELLER || targetRole == UserRole.SUPERADMIN) {
-                    throw new RuntimeException("ADMIN can only assign ADMIN or USER roles");
-                }
-                break;
-            case USER:
-                throw new RuntimeException("USER cannot assign roles");
-        }
     }
 }

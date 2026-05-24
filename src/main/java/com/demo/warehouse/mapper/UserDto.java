@@ -47,6 +47,7 @@ public class UserDto {
         Long id,
         String username,
         UserRole role,
-        Tenant tenant
+        Tenant tenant,
+        boolean isEditable
     ) {}
 }
