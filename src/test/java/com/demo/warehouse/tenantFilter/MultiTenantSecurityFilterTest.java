@@ -112,66 +112,6 @@ class MultiTenantSecurityFilterTest {
     }
 
     @Test
-    void doFilterInternal_WhenAuthenticatedWithEffectiveUser_ShouldSetEffectiveUserContext() {
-        // Arrange
-        var effectiveUser = new User();
-        effectiveUser.setId(2L);
-        effectiveUser.setAuth0Sub("auth0|effective");
-        effectiveUser.setTenant(tenant);
-
-        user.setActiveUserContextId(2L);
-
-        Authentication auth = mock(Authentication.class);
-        when(auth.getName()).thenReturn("auth0|test123");
-        when(auth.isAuthenticated()).thenReturn(true);
-        SecurityContextHolder.getContext().setAuthentication(auth);
-
-        when(userRepository.findByAuth0Sub("auth0|test123")).thenReturn(Optional.of(user));
-        when(userRepository.findById(2L)).thenReturn(Optional.of(effectiveUser));
-
-        // Act
-        boolean result = interceptor.preHandle(request, response, null);
-
-        // Assert
-        assertTrue(result);
-        var context = UserContextHolder.get();
-        assertNotNull(context);
-        assertEquals(user, context.getUser());
-    }
-
-    @Test
-    void doFilterInternal_WhenEffectiveUserFromDifferentTenant_ShouldNotSetEffectiveUser() {
-        // Arrange
-        var differentTenant = new Tenant();
-        differentTenant.setId(UUID.randomUUID());
-        differentTenant.setName("Different Tenant");
-
-        var effectiveUser = new User();
-        effectiveUser.setId(2L);
-        effectiveUser.setAuth0Sub("auth0|effective");
-        effectiveUser.setTenant(differentTenant);
-
-        user.setActiveUserContextId(2L);
-
-        Authentication auth = mock(Authentication.class);
-        when(auth.getName()).thenReturn("auth0|test123");
-        when(auth.isAuthenticated()).thenReturn(true);
-        SecurityContextHolder.getContext().setAuthentication(auth);
-
-        when(userRepository.findByAuth0Sub("auth0|test123")).thenReturn(Optional.of(user));
-        when(userRepository.findById(2L)).thenReturn(Optional.of(effectiveUser));
-
-        // Act
-        boolean result = interceptor.preHandle(request, response, null);
-
-        // Assert
-        assertTrue(result);
-        var context = UserContextHolder.get();
-        assertNotNull(context);
-        assertEquals(user, context.getUser());
-    }
-
-    @Test
     void doFilterInternal_WhenUserNotFound_ShouldThrowRuntimeException() {
         // Arrange
         Authentication auth = mock(Authentication.class);

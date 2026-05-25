@@ -53,7 +53,7 @@ public class UserController {
     private final UserService userService;
 
     @GetMapping("/me")
-    public UserDto.LoggedUserDto getCurrentUser(@AuthenticationPrincipal Jwt jwt) {
+    public UserDto.LoggedUserDto getCurrentUser() {
         return userMapper.toLogged(UserContextHolder.get().getUser());
     }
 

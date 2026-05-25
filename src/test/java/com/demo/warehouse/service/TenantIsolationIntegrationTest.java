@@ -60,21 +60,19 @@ class TenantIsolationIntegrationTest {
 
         // Create users for each tenant
         user1 = new User();
-        user1.setId(1L);
         user1.setUsername("user1");
         user1.setAuth0Sub("auth0|user1");
         user1.setTenant(tenant1);
         user1.setActiveUserContextId(null);
 
         user2 = new User();
-        user2.setId(2L);
         user2.setUsername("user2");
         user2.setAuth0Sub("auth0|user2");
         user2.setTenant(tenant2);
         user2.setActiveUserContextId(null);
 
-        userRepository.save(user1);
-        userRepository.save(user2);
+        user1 = userRepository.save(user1);
+        user2 = userRepository.save(user2);
 
         // Create dresses for tenant 1
         var dress1 = new Dress();

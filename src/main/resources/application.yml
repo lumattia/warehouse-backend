@@ -3,8 +3,8 @@ auth0:
   audience: https://mydemo.com
   issuer: https://dev-ia6wuqy53uzqku85.us.auth0.com/
   management:
-    clientId: tIuLtiFvpgae1z562kQXkf3Ecuy6s3aq
-    clientSecret: -EIZCnizdG1vOymv4fV2jga5moEgxtQBf2D2DOVQGpLFDz5Gl-7ubh7_DUYt8clg
+    clientId: ${AUTH0_MANAGEMENT_CLIENT_ID}
+    clientSecret: ${AUTH0_MANAGEMENT_CLIENT_SECRET}
     connection: Username-Password-Authentication
 
 spring:
@@ -24,8 +24,12 @@ spring:
       hibernate:
         format_sql: true
     open-in-view: false
+  data:
+    web:
+      pageable:
+        page-parameter: pageNumber
+        size-parameter: pageSize
 logging:
   level:
     org.hibernate.SQL: DEBUG
     org.hibernate.orm.jdbc.bind: TRACE
-

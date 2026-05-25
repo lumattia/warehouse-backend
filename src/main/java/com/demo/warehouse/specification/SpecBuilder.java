@@ -8,7 +8,7 @@ public class SpecBuilder<T> {
     private Specification<T> specification;
 
     private SpecBuilder() {
-        this.specification = Specification.where(null);
+    this.specification = (root, query, cb) -> cb.conjunction();
     }
 
     public static <T> SpecBuilder<T> repo(Class<T> type) {

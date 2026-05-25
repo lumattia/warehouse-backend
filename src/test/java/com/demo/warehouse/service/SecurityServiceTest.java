@@ -30,13 +30,10 @@ class SecurityServiceTest {
         testTenant.setId(UUID.randomUUID());
         testTenant.setName("Test Tenant");
         testTenant.setModules(Set.of(ModuleType.DRESS, ModuleType.DRESS_MOVEMENT));
-        
-        testUser = new User();
-        testUser.setId(1L);
-        testUser.setUsername("testuser");
-        testUser.setRole(UserRole.ADMIN);
+
+
+        testUser = new User(1L, "testuser", null, "", UserRole.SUPERADMIN, Set.of(testTenant));
         testUser.setTenant(testTenant);
-        
         UserContextHolder.set(UserContext.builder().realUser(testUser).build());
     }
 

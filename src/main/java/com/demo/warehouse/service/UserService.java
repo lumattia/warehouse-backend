@@ -93,7 +93,9 @@ public class UserService {
     @Transactional
     public UserDto.LoggedUserDto switchTenant(UUID tenantId) {
         User currentUser = UserContextHolder.get().getUser();
-
+        if (currentUser.getRole() == UserRole.USER || currentUser.getRole() == UserRole.ADMIN){
+            throw new RuntimeException("Only SUPERADMIN and RESELLER can switch tenants");
+        }
         com.demo.warehouse.domain.Tenant targetTenant = tenantRepository.findById(tenantId)
                 .orElseThrow(() -> new RuntimeException("Tenant not found"));
 
@@ -101,20 +103,18 @@ public class UserService {
         if (currentUser.getRole() == UserRole.SUPERADMIN) {
             currentUser.setTenant(targetTenant);
             userRepository.save(currentUser);
-            return userMapper.toLogged(currentUser);
         }
 
         // RESELLER can only change to tenants in their allowedTenants
         if (currentUser.getRole() == UserRole.RESELLER) {
-            if (!currentUser.getAllowedTenants().stream()
-                .anyMatch(tenant -> tenant.getId().equals(tenantId))) {
+            if (currentUser.getAllowedTenants().stream()
+                .noneMatch(tenant -> tenant.getId().equals(tenantId))) {
                 throw new RuntimeException("Tenant not allowed for this RESELLER");
             }
             currentUser.setTenant(targetTenant);
             userRepository.save(currentUser);
-            return userMapper.toLogged(currentUser);
         }
 
-        throw new RuntimeException("Only SUPERADMIN and RESELLER can switch tenants");
+        return userMapper.toLogged(currentUser);
     }
 }
