@@ -13,12 +13,8 @@ import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
 
-import java.nio.file.AccessDeniedException;
 import java.util.HashSet;
 import java.util.Set;
-
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
 
 import com.demo.warehouse.tenantFilter.UserContextHolder;
 import com.fasterxml.jackson.annotation.JsonIgnore;

@@ -15,10 +15,7 @@ public class SpecBuilder<T> {
         return new SpecBuilder<>();
     }
 
-    /**
-     * Método auxiliar mágico para resolver rutas anidadas separadas por puntos.
-     * Transforma "dress.titulo" en root.join("dress").get("titulo") de forma dinámica.
-     */
+    @SuppressWarnings("unchecked")
     private <Y> Path<Y> getPath(Root<T> root, String columnPath) {
         String[] parts = columnPath.split("\\.");
         Path<?> path = root;

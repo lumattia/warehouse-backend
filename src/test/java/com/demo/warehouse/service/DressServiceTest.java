@@ -1,7 +1,6 @@
 package com.demo.warehouse.service;
 
 import com.demo.warehouse.domain.Dress;
-import com.demo.warehouse.domain.User;
 import com.demo.warehouse.mapper.DressDtos;
 import com.demo.warehouse.mapper.DressMapper;
 import com.demo.warehouse.mapper.IdName;
@@ -67,7 +66,7 @@ class DressServiceTest {
     @Test
     void page_ShouldReturnPageOfDresses() {
         Page<Dress> page = new PageImpl<>(Collections.singletonList(dress), PageRequest.of(0, 10), 1);
-        when(dressRepository.getBySpec(any(Specification.class), any(Pageable.class))).thenReturn(page);
+        when(dressRepository.getBySpec(any(), any(Pageable.class))).thenReturn(page);
         when(dressMapper.toResponse(any(Dress.class))).thenReturn(dressResponse);
         Specification<Dress> dummySpec = (root, query, criteriaBuilder) -> null;
 
@@ -75,7 +74,7 @@ class DressServiceTest {
 
         assertNotNull(result);
         assertEquals(1, result.getTotalElements());
-        verify(dressRepository, times(1)).getBySpec(any(Specification.class), any(Pageable.class));
+        verify(dressRepository, times(1)).getBySpec(any(), any(Pageable.class));
         verify(dressMapper, times(1)).toResponse(any(Dress.class));
     }
 

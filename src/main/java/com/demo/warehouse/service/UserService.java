@@ -9,7 +9,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,7 +30,7 @@ public class UserService {
     private final TenantRepository tenantRepository;
 
     @Transactional(readOnly = true)
-    public Page<UserDto.UserResponse> page(Specification<User> spec, @NonNull Pageable pageable) {
+    public Page<UserDto.UserResponse> page(Specification<User> spec, Pageable pageable) {
         return userRepository.getBySpec(spec, pageable).map(userMapper::toResponse);
     }
     

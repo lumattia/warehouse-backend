@@ -6,7 +6,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -14,6 +13,9 @@ import com.demo.warehouse.domain.Dress;
 import com.demo.warehouse.mapper.DressMapper;
 import com.demo.warehouse.mapper.IdName;
 import com.demo.warehouse.repository.DressRepository;
+
+import jakarta.annotation.Nonnull;
+
 import com.demo.warehouse.mapper.DressDtos;
 
 @Service
@@ -24,7 +26,7 @@ public class DressService {
     private final DressRepository dressRepository;
 
     @Transactional(readOnly = true)
-    public Page<DressDtos.DressResponse> page(Specification<Dress> spec, @NonNull Pageable pageable) {
+    public Page<DressDtos.DressResponse> page(Specification<Dress> spec, @Nonnull Pageable pageable) {
         return dressRepository.getBySpec(spec, pageable).map(dressMapper::toResponse);
     }
     

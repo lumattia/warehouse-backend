@@ -8,7 +8,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,6 +22,8 @@ import com.demo.warehouse.repository.TenantRepository;
 import com.demo.warehouse.repository.UserRepository;
 import com.demo.warehouse.tenantFilter.UserContextHolder;
 
+import jakarta.annotation.Nonnull;
+
 @Service
 @RequiredArgsConstructor
 public class TenantService {
@@ -32,7 +33,7 @@ public class TenantService {
     private final UserRepository userRepository;
 
     @Transactional(readOnly = true)
-    public Page<TenantDtos.TenantResponse> page(@NonNull Pageable pageable) {
+    public Page<TenantDtos.TenantResponse> page(@Nonnull Pageable pageable) {
         User currentUser = UserContextHolder.get().getUser();
 
         if (currentUser.getRole() == UserRole.RESELLER) {

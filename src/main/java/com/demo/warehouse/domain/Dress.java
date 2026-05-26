@@ -17,7 +17,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import org.hibernate.annotations.Check;
 import org.hibernate.annotations.Formula;
 @Getter
 @Setter
@@ -26,7 +25,6 @@ import org.hibernate.annotations.Formula;
 @Table(name = "dresses",uniqueConstraints = {
     @UniqueConstraint(columnNames = {"sku", "tenant_id"}) // The combination must be unique
 })
-@Check(constraints = "color ~* '^#[0-9a-f]{6}$' OR color IS NULL")
 public class Dress extends TenantScopedEntity implements IdName<Long>{
 
     @Id
@@ -43,7 +41,10 @@ public class Dress extends TenantScopedEntity implements IdName<Long>{
     @Column(length = 64)
     private String size;
 
-    @Column(length = 7)
+    @Column(
+        length = 7,
+        columnDefinition = "VARCHAR(7) CHECK (color ~* '^#[0-9a-f]{6}$' OR color IS NULL)"
+    )
     private String color;
     @Column(nullable = false)
     private Integer stock = 0;

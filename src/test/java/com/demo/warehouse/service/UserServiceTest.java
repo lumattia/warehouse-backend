@@ -81,14 +81,14 @@ class UserServiceTest {
     @Test
     void page_ShouldReturnPageOfUsers() {
         Page<User> page = new PageImpl<>(Collections.singletonList(user), PageRequest.of(0, 10), 1);
-        when(userRepository.getBySpec(any(Specification.class), any(Pageable.class))).thenReturn(page);
+        when(userRepository.getBySpec(any(), any(Pageable.class))).thenReturn(page);
         when(userMapper.toResponse(any(User.class))).thenReturn(userResponse);
         Specification<User> dummySpec = (root, query, criteriaBuilder) -> null;
         Page<UserDto.UserResponse> result = userService.page(dummySpec, PageRequest.of(0, 10));
 
         assertNotNull(result);
         assertEquals(1, result.getTotalElements());
-        verify(userRepository, times(1)).getBySpec(any(Specification.class), any(Pageable.class));
+        verify(userRepository, times(1)).getBySpec(any(), any(Pageable.class));
         verify(userMapper, times(1)).toResponse(any(User.class));
     }
 
