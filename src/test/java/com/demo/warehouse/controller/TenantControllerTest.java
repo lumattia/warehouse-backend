@@ -86,7 +86,7 @@ class TenantControllerTest {
     @WithMockUser
     void page_ShouldReturnPageOfTenants() throws Exception {
         Page<TenantDtos.TenantResponse> page = new PageImpl<>(Collections.singletonList(tenantResponse), PageRequest.of(0, 10), 1);
-        when(tenantService.page(any())).thenReturn(page);
+        when(tenantService.page(any(), any())).thenReturn(page);
 
         mockMvc.perform(get("/tenants/page")
                         .param("page", "0")
@@ -95,7 +95,7 @@ class TenantControllerTest {
                 .andExpect(jsonPath("$.content").isArray())
                 .andExpect(jsonPath("$.totalElements").value(1));
 
-        verify(tenantService, times(1)).page(any());
+        verify(tenantService, times(1)).page(any(), any());
     }
 
     @Test

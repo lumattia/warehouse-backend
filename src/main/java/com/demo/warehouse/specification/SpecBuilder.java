@@ -61,6 +61,14 @@ public class SpecBuilder<T> {
         return this;
     }
 
+    public SpecBuilder<T> in(String column, java.util.Collection<?> values) {
+        if (values != null && !values.isEmpty()) {
+            specification = specification.and((root, q, cb) -> 
+                getPath(root, column).in(values));
+        }
+        return this;
+    }
+
     public Specification<T> build() {
         return this.specification;
     }

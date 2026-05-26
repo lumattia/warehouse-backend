@@ -14,6 +14,7 @@ import com.demo.warehouse.repository.TenantRepository;
 import com.demo.warehouse.repository.UserRepository;
 import com.demo.warehouse.service.Auth0ManagementService;
 import com.demo.warehouse.service.UserService;
+import com.demo.warehouse.specification.UserSpecification;
 import com.demo.warehouse.tenantFilter.UserContextHolder;
 
 import lombok.RequiredArgsConstructor;
@@ -101,7 +102,7 @@ public class UserController {
     @GetMapping("/page")
     @PreAuthorize("@securityService.isAtLeast('ADMIN')")
     public Page<UserDto.UserResponse> page(UserDto.UserFilterRequest filter, Pageable pageable) {
-        Specification<User> spec = buildSpecification(filter);
+        Specification<User> spec = UserSpecification.filterBy(filter);
         return userService.page(spec, pageable);
     }
 
@@ -150,23 +151,6 @@ public class UserController {
         User user = new User(null, username, null, auth0Sub, UserRole.RESELLER, Set.of(tenant));
         user.setTenant(tenant);
         return userRepository.save(user);
-    }
-
-    private Specification<User> buildSpecification(UserDto.UserFilterRequest filter) {
-        return (root, query, cb) -> {
-            var predicates = new java.util.ArrayList<jakarta.persistence.criteria.Predicate>();
-
-            if (filter != null) {
-                if (filter.username() != null && !filter.username().isEmpty()) {
-                    predicates.add(cb.like(cb.lower(root.get("username")), "%" + filter.username().toLowerCase() + "%"));
-                }
-                if (filter.role() != null) {
-                    predicates.add(cb.equal(root.get("role"), filter.role()));
-                }
-            }
-
-            return cb.and(predicates.toArray(new jakarta.persistence.criteria.Predicate[0]));
-        };
     }
 
     private String getRandomSize() {

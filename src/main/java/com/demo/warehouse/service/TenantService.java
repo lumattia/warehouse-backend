@@ -33,28 +33,8 @@ public class TenantService {
     private final UserRepository userRepository;
 
     @Transactional(readOnly = true)
-    public Page<TenantDtos.TenantResponse> page(@Nonnull Pageable pageable) {
-        User currentUser = UserContextHolder.get().getUser();
-
-        if (currentUser.getRole() == UserRole.RESELLER) {
-            // RESELLER solo ve sus allowedTenants
-            List<UUID> allowedTenantIds = currentUser.getAllowedTenants().stream()
-                .map(Tenant::getId)
-                .toList();
-            Specification<Tenant> spec = (root, query, cb) ->
-                root.get("id").in(allowedTenantIds);
-            return tenantRepository.findAll(spec, pageable).map(tenantMapper::toResponse);
-        }
-
-        if (currentUser.getRole() == UserRole.ADMIN) {
-            // ADMIN solo ve su propio tenant
-            Specification<Tenant> spec = (root, query, cb) ->
-                cb.equal(root.get("id"), currentUser.getTenant().getId());
-            return tenantRepository.findAll(spec, pageable).map(tenantMapper::toResponse);
-        }
-
-        // SUPERADMIN ve todos
-        return tenantRepository.findAll(pageable).map(tenantMapper::toResponse);
+    public Page<TenantDtos.TenantResponse> page(Specification<Tenant> spec, @Nonnull Pageable pageable) {
+        return tenantRepository.findAll(spec, pageable).map(tenantMapper::toResponse);
     }
 
     @Transactional(readOnly = true)

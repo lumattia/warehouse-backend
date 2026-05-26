@@ -67,14 +67,14 @@ class TenantServiceTest {
     @Test
     void page_ShouldReturnAllTenantsForSuperAdmin() {
         Page<Tenant> page = new PageImpl<>(List.of(tenant), PageRequest.of(0, 10), 1);
-        when(tenantRepository.findAll(any(Pageable.class))).thenReturn(page);
+        when(tenantRepository.findAll(ArgumentMatchers.<Specification<Tenant>>any(), any(Pageable.class))).thenReturn(page);
         when(tenantMapper.toResponse(any(Tenant.class))).thenReturn(tenantResponse);
 
-        Page<TenantDtos.TenantResponse> result = tenantService.page(PageRequest.of(0, 10));
+        Page<TenantDtos.TenantResponse> result = tenantService.page(null, PageRequest.of(0, 10));
 
         assertNotNull(result);
         assertEquals(1, result.getTotalElements());
-        verify(tenantRepository, times(1)).findAll(any(Pageable.class));
+        verify(tenantRepository, times(1)).findAll(ArgumentMatchers.<Specification<Tenant>>any(), any(Pageable.class));
         verify(tenantMapper, times(1)).toResponse(any(Tenant.class));
     }
 
@@ -91,7 +91,7 @@ class TenantServiceTest {
         )).thenReturn(page);
         when(tenantMapper.toResponse(any(Tenant.class))).thenReturn(tenantResponse);
 
-        Page<TenantDtos.TenantResponse> result = tenantService.page(PageRequest.of(0, 10));
+        Page<TenantDtos.TenantResponse> result = tenantService.page(null, PageRequest.of(0, 10));
 
         assertNotNull(result);
         assertEquals(1, result.getTotalElements());
@@ -108,7 +108,7 @@ class TenantServiceTest {
         when(tenantRepository.findAll(ArgumentMatchers.<Specification<Tenant>>any(), any(Pageable.class))).thenReturn(page);
         when(tenantMapper.toResponse(any(Tenant.class))).thenReturn(tenantResponse);
 
-        Page<TenantDtos.TenantResponse> result = tenantService.page(PageRequest.of(0, 10));
+        Page<TenantDtos.TenantResponse> result = tenantService.page(null, PageRequest.of(0, 10));
 
         assertNotNull(result);
         assertEquals(1, result.getTotalElements());

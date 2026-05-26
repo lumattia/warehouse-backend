@@ -5,6 +5,7 @@ import com.demo.warehouse.mapper.TenantDtos;
 import com.demo.warehouse.mapper.UserDto;
 import com.demo.warehouse.service.TenantService;
 import com.demo.warehouse.service.UserService;
+import com.demo.warehouse.specification.TenantSpecification;
 
 import lombok.RequiredArgsConstructor;
 
@@ -33,8 +34,8 @@ public class TenantController {
 
     @GetMapping("/page")
     @PreAuthorize("@securityService.canManageTenants()")
-    public Page<TenantDtos.TenantResponse> page(Pageable pageable) {
-        return tenantService.page(pageable);
+    public Page<TenantDtos.TenantResponse> page(TenantDtos.TenantFilterRequest filter, Pageable pageable) {
+        return tenantService.page(TenantSpecification.filterBy(filter), pageable);
     }
 
     @GetMapping("/list")
