@@ -1,10 +1,10 @@
 package com.demo.warehouse.controller;
 
-import com.demo.warehouse.domain.ModuleType;
 import com.demo.warehouse.domain.Tenant;
 import com.demo.warehouse.domain.User;
 import com.demo.warehouse.domain.UserRole;
 import com.demo.warehouse.mapper.IdName;
+import com.demo.warehouse.mapper.IdNameImpl;
 import com.demo.warehouse.mapper.UserDto;
 import com.demo.warehouse.mapper.UserMapper;
 import com.demo.warehouse.repository.DressMovementRepository;
@@ -13,8 +13,8 @@ import com.demo.warehouse.repository.TenantRepository;
 import com.demo.warehouse.repository.UserRepository;
 import com.demo.warehouse.service.Auth0ManagementService;
 import com.demo.warehouse.service.UserService;
-import com.demo.warehouse.tenantFilter.UserContext;
 import com.demo.warehouse.tenantFilter.UserContextHolder;
+import com.demo.warehouse.testutils.TestFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -71,28 +71,13 @@ class UserControllerTest {
         this.objectMapper = new com.fasterxml.jackson.databind.ObjectMapper();
         this.objectMapper.findAndRegisterModules();
 
-        tenant = new Tenant();
-        tenant.setId(UUID.randomUUID());
-        tenant.setName("Test Tenant");
-        tenant.setModules(Set.of(ModuleType.DRESS));
-
-        user = new User(null, "testuser", null, "", UserRole.SUPERADMIN, new HashSet<>());
-
-        user.setTenant(tenant);
-
-        userResponse = UserDto.UserResponse.builder()
-                .id(1L)
-                .username("testuser")
-                .role(UserRole.ADMIN)
-                .tenant(tenant)
-                .isEditable(true)
-                .build();
-
+        tenant = TestFactory.createDefaultTenant();
+        user = TestFactory.createDefaultUser(tenant);
+        userResponse = TestFactory.createDefaultUserResponse(tenant);
         loggedUserDto = new UserDto.LoggedUserDto(1L, "testuser", "auth0sub", UserRole.ADMIN, tenant);
 
         when(userRepository.findByAuth0Sub(anyString())).thenReturn(java.util.Optional.of(user));
-        UserContext context = UserContext.builder().realUser(user).build();
-        UserContextHolder.set(context);
+        TestFactory.setUserContextHolder(user);
     }
 
     @AfterEach
@@ -132,7 +117,7 @@ class UserControllerTest {
     @Test
     @WithMockUser
     void list_ShouldReturnListOfUsers() throws Exception {
-        List<IdName<Long>> list = Collections.singletonList(new IdNameImpl(1L, "testuser"));
+        List<IdName<Long>> list = Collections.singletonList(new IdNameImpl<>(1L, "testuser"));
         when(userService.list()).thenReturn(list);
 
         mockMvc.perform(get("/users/list"))

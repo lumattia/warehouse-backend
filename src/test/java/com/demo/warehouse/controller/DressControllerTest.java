@@ -3,8 +3,10 @@ package com.demo.warehouse.controller;
 import com.demo.warehouse.domain.User;
 import com.demo.warehouse.mapper.DressDtos;
 import com.demo.warehouse.mapper.IdName;
+import com.demo.warehouse.mapper.IdNameImpl;
 import com.demo.warehouse.repository.UserRepository;
 import com.demo.warehouse.service.DressService;
+import com.demo.warehouse.testutils.TestFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -49,15 +51,7 @@ class DressControllerTest {
         this.objectMapper.findAndRegisterModules();
         var mockUser = new User();
         when(userRepository.findByAuth0Sub(anyString())).thenReturn(java.util.Optional.of(mockUser));
-        dressResponse = DressDtos.DressResponse.builder()
-                .id(1L)
-                .title("Test Dress")
-                .sku("SKU001")
-                .size("M")
-                .color("#FF0000")
-                .price(new BigDecimal("100.00"))
-                .stock(10)
-                .build();
+        dressResponse = TestFactory.createDefaultDressResponse();
         createRequest = new DressDtos.DressCreateRequest(
                 "Test Dress", "SKU001", "M", "#FF0000", new BigDecimal("100.00")
         );
@@ -85,7 +79,7 @@ class DressControllerTest {
     @Test
     @WithMockUser
     void list_ShouldReturnListOfDresses() throws Exception {
-        List<IdName<Long>> list = Collections.singletonList(new IdNameImpl(1L, "Test Dress"));
+        List<IdName<Long>> list = Collections.singletonList(new IdNameImpl<>(1L, "Test Dress"));
         when(dressService.list()).thenReturn(list);
 
         mockMvc.perform(get("/dresses/list"))

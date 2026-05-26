@@ -10,8 +10,8 @@ import com.demo.warehouse.mapper.UserDto;
 import com.demo.warehouse.repository.UserRepository;
 import com.demo.warehouse.service.TenantService;
 import com.demo.warehouse.service.UserService;
-import com.demo.warehouse.tenantFilter.UserContext;
 import com.demo.warehouse.tenantFilter.UserContextHolder;
+import com.demo.warehouse.testutils.TestFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -74,8 +74,7 @@ class TenantControllerTest {
                 .build();
 
         when(userRepository.findByAuth0Sub(anyString())).thenReturn(java.util.Optional.of(user));
-        UserContext context = UserContext.builder().realUser(user).build();
-        UserContextHolder.set(context);
+        TestFactory.setUserContextHolder(user);
     }
 
     @AfterEach

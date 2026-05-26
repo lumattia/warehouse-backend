@@ -4,12 +4,13 @@ import com.demo.warehouse.domain.Tenant;
 import com.demo.warehouse.domain.User;
 import com.demo.warehouse.domain.UserRole;
 import com.demo.warehouse.mapper.IdName;
+import com.demo.warehouse.mapper.IdNameImpl;
 import com.demo.warehouse.mapper.UserDto;
 import com.demo.warehouse.mapper.UserMapper;
 import com.demo.warehouse.repository.TenantRepository;
 import com.demo.warehouse.repository.UserRepository;
-import com.demo.warehouse.tenantFilter.UserContext;
 import com.demo.warehouse.tenantFilter.UserContextHolder;
+import com.demo.warehouse.testutils.TestFactory;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -54,23 +55,10 @@ class UserServiceTest {
 
     @BeforeEach
     void setUp() {
-        tenant = new Tenant();
-        tenant.setId(UUID.randomUUID());
-        tenant.setName("Test Tenant");
-
-        user = new User(1L, "testuser", null, "", UserRole.SUPERADMIN, Set.of(tenant));
-        user.setTenant(tenant);
-        UserContext mockContext = UserContext.builder().realUser(user).build();
-
-
-        UserContextHolder.set(mockContext);
-        userResponse = UserDto.UserResponse.builder()
-                .id(1L)
-                .username("testuser")
-                .role(UserRole.ADMIN)
-                .tenant(tenant)
-                .isEditable(true)
-                .build();
+        tenant = TestFactory.createDefaultTenant();
+        user = TestFactory.createDefaultUser(tenant);
+        TestFactory.setUserContextHolder(user);
+        userResponse = TestFactory.createDefaultUserResponse(tenant);
     }
 
     @AfterEach
@@ -94,7 +82,7 @@ class UserServiceTest {
 
     @Test
     void list_ShouldReturnListOfUsers() {
-        List<IdName<Long>> list = Collections.singletonList(new IdNameImpl(1L, "testuser"));
+        List<IdName<Long>> list = Collections.singletonList(new IdNameImpl<>(1L, "testuser"));
         when(userRepository.getAllAsIdName()).thenReturn(list);
 
         List<IdName<Long>> result = userService.list();
@@ -201,9 +189,6 @@ class UserServiceTest {
 
     @Test
     void switchTenant_ShouldSwitchTenantForSuperAdmin() {
-        UserContext context = UserContext.builder().realUser(user).build();
-        UserContextHolder.set(context);
-
         when(tenantRepository.findById(tenant.getId())).thenReturn(Optional.of(tenant));
         when(userRepository.save(any(User.class))).thenReturn(user);
         when(userMapper.toLogged(user)).thenReturn(new UserDto.LoggedUserDto(1L, "testuser", "auth0sub", UserRole.ADMIN, tenant));
@@ -219,8 +204,7 @@ class UserServiceTest {
     void switchTenant_ShouldSwitchTenantForReseller() {
         user.setRole(UserRole.RESELLER);
         user.setAllowedTenants(Set.of(tenant));
-        UserContext context = UserContext.builder().realUser(user).build();
-        UserContextHolder.set(context);
+        TestFactory.setUserContextHolder(user);
 
         when(tenantRepository.findById(tenant.getId())).thenReturn(Optional.of(tenant));
         when(userRepository.save(any(User.class))).thenReturn(user);
@@ -237,8 +221,7 @@ class UserServiceTest {
     void switchTenant_ShouldThrowWhenTenantNotAllowedForReseller() {
         user.setRole(UserRole.RESELLER);
         user.setAllowedTenants(Set.of());
-        UserContext context = UserContext.builder().realUser(user).build();
-        UserContextHolder.set(context);
+        TestFactory.setUserContextHolder(user);
 
         when(tenantRepository.findById(tenant.getId())).thenReturn(Optional.of(tenant));
 
@@ -249,9 +232,6 @@ class UserServiceTest {
 
     @Test
     void switchTenant_ShouldThrowWhenTenantNotFound() {
-        UserContext context = UserContext.builder().realUser(user).build();
-        UserContextHolder.set(context);
-
         when(tenantRepository.findById(tenant.getId())).thenReturn(Optional.empty());
 
         assertThrows(RuntimeException.class, () -> userService.switchTenant(tenant.getId()));
@@ -261,8 +241,7 @@ class UserServiceTest {
     @Test
     void switchTenant_ShouldThrowForUserRole() {
         user.setRole(UserRole.USER);
-        UserContext context = UserContext.builder().realUser(user).build();
-        UserContextHolder.set(context);
+        TestFactory.setUserContextHolder(user);
 
         assertThrows(RuntimeException.class, () -> userService.switchTenant(tenant.getId()));
         verify(tenantRepository, never()).findById(any(UUID.class));

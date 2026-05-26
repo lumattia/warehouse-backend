@@ -6,8 +6,8 @@ import com.demo.warehouse.domain.User;
 import com.demo.warehouse.mapper.DressDtos;
 import com.demo.warehouse.repository.DressRepository;
 import com.demo.warehouse.repository.UserRepository;
-import com.demo.warehouse.tenantFilter.UserContext;
 import com.demo.warehouse.tenantFilter.UserContextHolder;
+import com.demo.warehouse.testutils.TestFactory;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -125,10 +125,7 @@ class TenantIsolationIntegrationTest {
     @Test
     void whenQueryingAsTenant1_ShouldOnlyReturnTenant1Dresses() {
         // Arrange
-        var context = UserContext.builder()
-                .realUser(user1)
-                .build();
-        UserContextHolder.set(context);
+        TestFactory.setUserContextHolder(user1);
 
         // Act
         var spec = com.demo.warehouse.specification.DressSpecification.filterBy(
@@ -144,11 +141,8 @@ class TenantIsolationIntegrationTest {
     @Test
     void whenQueryingAsTenant2_ShouldOnlyReturnTenant2Dresses() {
         // Arrange
-        var context = UserContext.builder()
-                .realUser(user2)
-                .build();
-        UserContextHolder.set(context);
-
+        TestFactory.setUserContextHolder(user2);
+        
         // Act
         var spec = com.demo.warehouse.specification.DressSpecification.filterBy(
                 new DressDtos.DressFilterRequest(null, null, null, null, null, null, null, null));
@@ -163,11 +157,8 @@ class TenantIsolationIntegrationTest {
     @Test
     void whenQueryingWithFilter_ShouldOnlyReturnMatchingTenantDresses() {
         // Arrange
-        var context = UserContext.builder()
-                .realUser(user1)
-                .build();
-        UserContextHolder.set(context);
-
+        TestFactory.setUserContextHolder(user1);
+        
         // Act
         var spec = com.demo.warehouse.specification.DressSpecification.filterBy(
                 new DressDtos.DressFilterRequest("Dress 1", null, null, null, null, null, null, null));
@@ -195,11 +186,8 @@ class TenantIsolationIntegrationTest {
     @Test
     void whenCreatingDress_ShouldAssignCorrectTenant() {
         // Arrange
-        var context = UserContext.builder()
-                .realUser(user1)
-                .build();
-        UserContextHolder.set(context);
-
+        TestFactory.setUserContextHolder(user1);
+        
         var request = new DressDtos.DressCreateRequest(
                 "New Dress",
                 "SKU005",
@@ -225,11 +213,8 @@ class TenantIsolationIntegrationTest {
     @Test
     void whenUpdatingDress_ShouldOnlyAccessOwnTenantDress() {
         // Arrange
-        var context = UserContext.builder()
-                .realUser(user1)
-                .build();
-        UserContextHolder.set(context);
-
+        TestFactory.setUserContextHolder(user1);
+        
         // Get a dress from tenant 1 using service
         var spec = com.demo.warehouse.specification.DressSpecification.filterBy(
                 new DressDtos.DressFilterRequest("Dress 1", null, null, null, null, null, null, null));

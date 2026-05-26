@@ -4,8 +4,8 @@ import com.demo.warehouse.domain.ModuleType;
 import com.demo.warehouse.domain.Tenant;
 import com.demo.warehouse.domain.User;
 import com.demo.warehouse.domain.UserRole;
-import com.demo.warehouse.tenantFilter.UserContext;
 import com.demo.warehouse.tenantFilter.UserContextHolder;
+import com.demo.warehouse.testutils.TestFactory;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -34,7 +34,7 @@ class SecurityServiceTest {
 
         testUser = new User(1L, "testuser", null, "", UserRole.SUPERADMIN, Set.of(testTenant));
         testUser.setTenant(testTenant);
-        UserContextHolder.set(UserContext.builder().realUser(testUser).build());
+        TestFactory.setUserContextHolder(testUser);
     }
 
     @AfterEach

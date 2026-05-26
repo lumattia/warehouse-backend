@@ -5,12 +5,13 @@ import com.demo.warehouse.domain.Tenant;
 import com.demo.warehouse.domain.User;
 import com.demo.warehouse.domain.UserRole;
 import com.demo.warehouse.mapper.IdName;
+import com.demo.warehouse.mapper.IdNameImpl;
 import com.demo.warehouse.mapper.TenantDtos;
 import com.demo.warehouse.mapper.TenantMapper;
 import com.demo.warehouse.repository.TenantRepository;
 import com.demo.warehouse.repository.UserRepository;
-import com.demo.warehouse.tenantFilter.UserContext;
 import com.demo.warehouse.tenantFilter.UserContextHolder;
+import com.demo.warehouse.testutils.TestFactory;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -52,23 +53,10 @@ class TenantServiceTest {
 
     @BeforeEach
     void setUp() {
-        tenant = new Tenant();
-        tenant.setId(UUID.randomUUID());
-        tenant.setName("Test Tenant");
-        tenant.setModules(Set.of(ModuleType.DRESS));
-
-        user = new User(null, "testuser", null, "", UserRole.SUPERADMIN, new HashSet<>());
-        user.setTenant(tenant);
-        UserContext mockContext = UserContext.builder().realUser(user).build();
-
-        UserContextHolder.set(mockContext);
-        tenantResponse = TenantDtos.TenantResponse.builder()
-                .id(tenant.getId())
-                .name("Test Tenant")
-                .modules(Set.of(ModuleType.DRESS))
-                .createdAt(java.time.Instant.now())
-                .expiresAt(null)
-                .build();
+        tenant = TestFactory.createDefaultTenant();
+        user = TestFactory.createDefaultUser(tenant);
+        TestFactory.setUserContextHolder(user);
+        tenantResponse = TestFactory.createDefaultTenantResponse(tenant.getId());
     }
 
     @AfterEach
@@ -78,9 +66,6 @@ class TenantServiceTest {
 
     @Test
     void page_ShouldReturnAllTenantsForSuperAdmin() {
-        UserContext context = UserContext.builder().realUser(user).build();
-        UserContextHolder.set(context);
-
         Page<Tenant> page = new PageImpl<>(List.of(tenant), PageRequest.of(0, 10), 1);
         when(tenantRepository.findAll(any(Pageable.class))).thenReturn(page);
         when(tenantMapper.toResponse(any(Tenant.class))).thenReturn(tenantResponse);
@@ -97,8 +82,7 @@ class TenantServiceTest {
     void page_ShouldReturnAllowedTenantsForReseller() {
         user.setRole(UserRole.RESELLER);
         user.setAllowedTenants(Set.of(tenant));
-        UserContext context = UserContext.builder().realUser(user).build();
-        UserContextHolder.set(context);
+        TestFactory.setUserContextHolder(user);
 
         Page<Tenant> page = new PageImpl<>(List.of(tenant), PageRequest.of(0, 10), 1);
         when(tenantRepository.findAll(
@@ -118,8 +102,7 @@ class TenantServiceTest {
     @Test
     void page_ShouldReturnOwnTenantForAdmin() {
         user.setRole(UserRole.ADMIN);
-        UserContext context = UserContext.builder().realUser(user).build();
-        UserContextHolder.set(context);
+        TestFactory.setUserContextHolder(user);
 
         Page<Tenant> page = new PageImpl<>(List.of(tenant), PageRequest.of(0, 10), 1);
         when(tenantRepository.findAll(ArgumentMatchers.<Specification<Tenant>>any(), any(Pageable.class))).thenReturn(page);
@@ -136,20 +119,9 @@ class TenantServiceTest {
     @Test
     void list_ShouldReturnAllTenantsForSuperAdmin() {
         user.setRole(UserRole.SUPERADMIN);
-        UserContext context = UserContext.builder().realUser(user).build();
-        UserContextHolder.set(context);
+        TestFactory.setUserContextHolder(user);
 
-        IdName<UUID> idName = new IdName<>() {
-            @Override
-            public UUID getId() {
-                return tenant.getId();
-            }
-
-            @Override
-            public String getName() {
-                return tenant.getName();
-            }
-        };
+        IdName<UUID> idName = new IdNameImpl<>(tenant.getId(), tenant.getName());
         List<IdName<UUID>> list = List.of(idName);
         when(tenantRepository.listByIdName()).thenReturn(list);
 
@@ -164,8 +136,7 @@ class TenantServiceTest {
     void list_ShouldReturnAllowedTenantsForReseller() {
         user.setRole(UserRole.RESELLER);
         user.setAllowedTenants(Set.of(tenant));
-        UserContext context = UserContext.builder().realUser(user).build();
-        UserContextHolder.set(context);
+        TestFactory.setUserContextHolder(user);
 
         List<IdName<UUID>> result = tenantService.list();
 
@@ -177,8 +148,7 @@ class TenantServiceTest {
     @Test
     void detail_ShouldReturnTenantForSuperAdmin() {
         user.setRole(UserRole.SUPERADMIN);
-        UserContext context = UserContext.builder().realUser(user).build();
-        UserContextHolder.set(context);
+        TestFactory.setUserContextHolder(user);
 
         when(tenantRepository.findById(tenant.getId())).thenReturn(Optional.of(tenant));
         when(tenantMapper.toResponse(tenant)).thenReturn(tenantResponse);
@@ -194,8 +164,7 @@ class TenantServiceTest {
     void detail_ShouldReturnAllowedTenantForReseller() {
         user.setRole(UserRole.RESELLER);
         user.setAllowedTenants(Set.of(tenant));
-        UserContext context = UserContext.builder().realUser(user).build();
-        UserContextHolder.set(context);
+        TestFactory.setUserContextHolder(user);
 
         when(tenantRepository.findById(tenant.getId())).thenReturn(Optional.of(tenant));
         when(tenantMapper.toResponse(tenant)).thenReturn(tenantResponse);
@@ -211,8 +180,7 @@ class TenantServiceTest {
     void detail_ShouldThrowWhenTenantNotAllowedForReseller() {
         user.setRole(UserRole.RESELLER);
         user.setAllowedTenants(Set.of());
-        UserContext context = UserContext.builder().realUser(user).build();
-        UserContextHolder.set(context);
+        TestFactory.setUserContextHolder(user);
 
         assertThrows(RuntimeException.class, () -> tenantService.detail(tenant.getId()));
         verify(tenantRepository, never()).findById(any(UUID.class));
@@ -221,8 +189,7 @@ class TenantServiceTest {
     @Test
     void detail_ShouldReturnOwnTenantForAdmin() {
         user.setRole(UserRole.ADMIN);
-        UserContext context = UserContext.builder().realUser(user).build();
-        UserContextHolder.set(context);
+        TestFactory.setUserContextHolder(user);
 
         when(tenantRepository.findById(tenant.getId())).thenReturn(Optional.of(tenant));
         when(tenantMapper.toResponse(tenant)).thenReturn(tenantResponse);
@@ -238,8 +205,7 @@ class TenantServiceTest {
     void detail_ShouldThrowWhenAdminViewsOtherTenant() {
         user.setRole(UserRole.ADMIN);
         UUID otherTenantId = UUID.randomUUID();
-        UserContext context = UserContext.builder().realUser(user).build();
-        UserContextHolder.set(context);
+        TestFactory.setUserContextHolder(user);
 
         assertThrows(RuntimeException.class, () -> tenantService.detail(otherTenantId));
         verify(tenantRepository, never()).findById(any(UUID.class));
@@ -248,8 +214,7 @@ class TenantServiceTest {
     @Test
     void detail_ShouldThrowWhenTenantNotFound() {
         user.setRole(UserRole.SUPERADMIN);
-        UserContext context = UserContext.builder().realUser(user).build();
-        UserContextHolder.set(context);
+        TestFactory.setUserContextHolder(user);
 
         when(tenantRepository.findById(tenant.getId())).thenReturn(Optional.empty());
 
@@ -260,8 +225,7 @@ class TenantServiceTest {
     @Test
     void create_ShouldCreateTenantForSuperAdmin() {
         user.setRole(UserRole.SUPERADMIN);
-        UserContext context = UserContext.builder().realUser(user).build();
-        UserContextHolder.set(context);
+        TestFactory.setUserContextHolder(user);
 
         TenantDtos.TenantCreateRequest request = new TenantDtos.TenantCreateRequest("New Tenant", Set.of(ModuleType.DRESS));
         when(tenantRepository.save(any(Tenant.class))).thenReturn(tenant);
@@ -277,8 +241,7 @@ class TenantServiceTest {
     @Test
     void create_ShouldCreateTenantAndAddToReseller() {
         user.setRole(UserRole.RESELLER);
-        UserContext context = UserContext.builder().realUser(user).build();
-        UserContextHolder.set(context);
+        TestFactory.setUserContextHolder(user);
 
         TenantDtos.TenantCreateRequest request = new TenantDtos.TenantCreateRequest("New Tenant", Set.of(ModuleType.DRESS));
         when(tenantRepository.save(any(Tenant.class))).thenReturn(tenant);

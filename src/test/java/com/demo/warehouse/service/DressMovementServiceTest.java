@@ -5,6 +5,7 @@ import com.demo.warehouse.domain.DressMovement;
 import com.demo.warehouse.mapper.DressMovementDtos;
 import com.demo.warehouse.repository.DressMovementRepository;
 import com.demo.warehouse.repository.DressRepository;
+import com.demo.warehouse.testutils.TestFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,7 +18,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 
-import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.Optional;
 
@@ -42,20 +42,8 @@ class DressMovementServiceTest {
 
     @BeforeEach
     void setUp() {
-        dress = new Dress();
-        dress.setId(1L);
-        dress.setTitle("Test Dress");
-        dress.setSku("SKU001");
-        dress.setSize("M");
-        dress.setColor("#FF0000");
-        dress.setStock(10);
-        dress.setPrice(new BigDecimal("100.00"));
-
-        dressMovement = new DressMovement();
-        dressMovement.setId(1L);
-        dressMovement.setDress(dress);
-        dressMovement.setQuantity(5);
-        dressMovement.setInstant(Instant.now());
+        dress = TestFactory.createDefaultDress();
+        dressMovement = TestFactory.createDefaultDressMovement(dress);
     }
 
     @Test

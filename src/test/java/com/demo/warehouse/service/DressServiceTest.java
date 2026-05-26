@@ -4,7 +4,9 @@ import com.demo.warehouse.domain.Dress;
 import com.demo.warehouse.mapper.DressDtos;
 import com.demo.warehouse.mapper.DressMapper;
 import com.demo.warehouse.mapper.IdName;
+import com.demo.warehouse.mapper.IdNameImpl;
 import com.demo.warehouse.repository.DressRepository;
+import com.demo.warehouse.testutils.TestFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -43,24 +45,9 @@ class DressServiceTest {
 
     @BeforeEach
     void setUp() {
-        dress = new Dress();
-        dress.setId(1L);
-        dress.setTitle("Test Dress");
-        dress.setSku("SKU001");
-        dress.setSize("M");
-        dress.setColor("#FF0000");
+        dress = TestFactory.createDefaultDress();
         dress.setStock(0);
-        dress.setPrice(new BigDecimal("100.00"));
-
-        dressResponse = DressDtos.DressResponse.builder()
-                .id(1L)
-                .title("Test Dress")
-                .sku("SKU001")
-                .size("M")
-                .color("#FF0000")
-                .price(new BigDecimal("100.00"))
-                .stock(10)
-                .build();
+        dressResponse = TestFactory.createDefaultDressResponse();
     }
 
     @Test
@@ -80,7 +67,7 @@ class DressServiceTest {
 
     @Test
     void list_ShouldReturnListOfDresses() {
-        List<IdName<Long>> list = Collections.singletonList(new IdNameImpl(1L, "Test Dress"));
+        List<IdName<Long>> list = Collections.singletonList(new IdNameImpl<>(1L, "Test Dress"));
         when(dressRepository.getAllAsIdName()).thenReturn(list);
 
         List<IdName<Long>> result = dressService.list();
