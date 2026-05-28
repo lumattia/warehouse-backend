@@ -1,5 +1,6 @@
 package com.demo.warehouse.controller;
 
+import com.demo.warehouse.domain.ModuleType;
 import com.demo.warehouse.domain.UserRole;
 import com.demo.warehouse.tenantFilter.UserContextHolder;
 
@@ -8,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/enums")
@@ -23,5 +25,9 @@ public class EnumController {
             case ADMIN -> List.of("ADMIN", "USER");
             case USER -> List.of();
         };
+    }
+    @GetMapping("/modules")
+    public Set<ModuleType> getAssignableModules() {
+        return UserContextHolder.get().getUser().getTenant().getModules();
     }
 }

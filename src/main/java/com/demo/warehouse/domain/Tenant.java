@@ -48,6 +48,9 @@ public class Tenant {
     @Enumerated(EnumType.STRING)
     private Set<ModuleType> modules = new HashSet<>();
 
+    @Column(nullable = false)
+    private Boolean hasCustomFields = true;
+
     @PrePersist
     void prePersist() {
         createdAt = Instant.now();
