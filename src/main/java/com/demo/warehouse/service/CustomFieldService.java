@@ -10,6 +10,7 @@ import com.demo.warehouse.mapper.CustomFieldDtos;
 import com.demo.warehouse.repository.CustomFieldDefinitionRepository;
 import com.demo.warehouse.repository.CustomFieldGroupRepository;
 import com.demo.warehouse.repository.CustomFieldValueRepository;
+import com.demo.warehouse.specification.CustomFieldGroupSpecification;
 import com.demo.warehouse.tenantFilter.UserContextHolder;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -33,7 +34,7 @@ public class CustomFieldService {
             return Collections.emptyList();
         }
 
-        List<CustomFieldGroup> groups = groupRepository.findByTenantIdAndModuleOrderByGroupOrderAsc(tenant.getId(), module);
+        List<CustomFieldGroup> groups = groupRepository.listBySpec(CustomFieldGroupSpecification.getAllWithModule(module));
 
         Map<Long, String> existingValues = valueRepository.findByTargetId(targetId).stream()
                 .collect(Collectors.toMap(
@@ -68,7 +69,7 @@ public class CustomFieldService {
             return;
         }
 
-        List<CustomFieldGroup> groups = groupRepository.findByTenantIdAndModuleOrderByGroupOrderAsc(tenant.getId(), module);
+        List<CustomFieldGroup> groups = groupRepository.listBySpec(CustomFieldGroupSpecification.getAllWithModule(module));
         List<CustomFieldDefinition> allDefinitions = groups.stream()
                 .flatMap(g -> g.getDefinitions().stream())
                 .collect(Collectors.toList());
@@ -137,45 +138,37 @@ public class CustomFieldService {
     }
 
     @Transactional
-    public void updateOrders(ModuleType module, List<CustomFieldDtos.OrderUpdateDTO> groupOrders, List<CustomFieldDtos.OrderUpdateDTO> fieldOrders) {
-        Tenant tenant = UserContextHolder.get().getUser().getTenant();
+    public void updateOrders(ModuleType module, List<Long> groupOrders, List<CustomFieldDtos.FieldOrderUpdate> fieldOrders) {
+        for (int i = 0; i < groupOrders.size(); i++) {
+            Long groupId = groupOrders.get(i);
+            CustomFieldGroup group = groupRepository.findById(groupId)
+                    .orElseThrow(() -> new RuntimeException("Group not found: " + groupId));
 
-        Set<Integer> groupOrderSet = new HashSet<>();
-        for (CustomFieldDtos.OrderUpdateDTO dto : groupOrders) {
-            if (!groupOrderSet.add(dto.order())) {
-                throw new RuntimeException("Duplicate group order detected: " + dto.order());
-            }
-        }
-
-        Set<Integer> fieldOrderSet = new HashSet<>();
-        for (CustomFieldDtos.OrderUpdateDTO dto : fieldOrders) {
-            if (!fieldOrderSet.add(dto.order())) {
-                throw new RuntimeException("Duplicate field order detected: " + dto.order());
-            }
-        }
-
-        for (CustomFieldDtos.OrderUpdateDTO dto : groupOrders) {
-            CustomFieldGroup group = groupRepository.findById(dto.id())
-                    .orElseThrow(() -> new RuntimeException("Group not found: " + dto.id()));
-
-            if (!group.getTenantId().equals(tenant.getId()) || !group.getModule().equals(module)) {
-                throw new RuntimeException("Unauthorized or invalid module for group: " + dto.id());
+            if (!group.getModule().equals(module)) {
+                throw new RuntimeException("Unauthorized or invalid module for group: " + groupId);
             }
 
-            group.setGroupOrder(dto.order());
+            group.setGroupOrder(i);
             groupRepository.save(group);
         }
 
-        for (CustomFieldDtos.OrderUpdateDTO dto : fieldOrders) {
-            CustomFieldDefinition definition = definitionRepository.findById(dto.id())
-                    .orElseThrow(() -> new RuntimeException("Definition not found: " + dto.id()));
+        for (int i = 0; i < fieldOrders.size(); i++) {
+            CustomFieldDtos.FieldOrderUpdate fieldOrderUpdate = fieldOrders.get(i);
+            Long fieldId = fieldOrderUpdate.fieldId();
+            Long newGroupId = fieldOrderUpdate.groupId();
+            
+            CustomFieldDefinition definition = definitionRepository.findById(fieldId)
+                    .orElseThrow(() -> new RuntimeException("Definition not found: " + fieldId));
 
-            CustomFieldGroup group = definition.getGroup();
-            if (!group.getTenantId().equals(tenant.getId()) || !group.getModule().equals(module)) {
-                throw new RuntimeException("Unauthorized or invalid module for definition: " + dto.id());
+            CustomFieldGroup newGroup = groupRepository.findById(newGroupId)
+                    .orElseThrow(() -> new RuntimeException("Group not found: " + newGroupId));
+
+            if (!newGroup.getModule().equals(module)) {
+                throw new RuntimeException("Unauthorized or invalid module for group: " + newGroupId);
             }
 
-            definition.setFieldOrder(dto.order());
+            definition.setFieldOrder(i);
+            definition.setGroup(newGroup);
             definitionRepository.save(definition);
         }
     }
@@ -186,8 +179,7 @@ public class CustomFieldService {
         if (!tenant.getHasCustomFields()) {
             return Collections.emptyList();
         }
-
-        return groupRepository.findByTenantIdAndModuleOrderByGroupOrderAsc(tenant.getId(), module).stream()
+        return groupRepository.listBySpec(CustomFieldGroupSpecification.getAllWithModule(module)).stream()
                 .map(group -> {
                     List<CustomFieldDtos.CustomFieldDefinitionResponse> definitions = group.getDefinitions().stream()
                             .map(def -> {
@@ -217,7 +209,7 @@ public class CustomFieldService {
         group.setName(request.name());
         group.setGroupOrder(request.groupOrder() != null ? request.groupOrder() : 0);
         group.setModule(request.module());
-        group.setTenantId(tenant.getId());
+        group.setTenant(tenant);
         group = groupRepository.save(group);
 
         return new CustomFieldDtos.CustomFieldGroupResponse(
@@ -232,13 +224,8 @@ public class CustomFieldService {
         CustomFieldGroup group = groupRepository.findById(request.id())
                 .orElseThrow(() -> new RuntimeException("Group not found: " + request.id()));
 
-        if (!group.getTenantId().equals(tenant.getId())) {
-            throw new RuntimeException("Unauthorized to update group: " + request.id());
-        }
-
         group.setName(request.name());
         group.setGroupOrder(request.groupOrder() != null ? request.groupOrder() : group.getGroupOrder());
-        group.setModule(request.module());
         group = groupRepository.save(group);
 
         List<CustomFieldDtos.CustomFieldDefinitionResponse> definitions = group.getDefinitions().stream()
@@ -258,13 +245,9 @@ public class CustomFieldService {
 
     @Transactional
     public void deleteGroup(Long id) {
-        Tenant tenant = UserContextHolder.get().getUser().getTenant();
         CustomFieldGroup group = groupRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Group not found: " + id));
 
-        if (!group.getTenantId().equals(tenant.getId())) {
-            throw new RuntimeException("Unauthorized to delete group: " + id);
-        }
         groupRepository.delete(group);
     }
 
@@ -278,10 +261,6 @@ public class CustomFieldService {
 
         CustomFieldGroup group = groupRepository.findById(request.groupId())
                 .orElseThrow(() -> new RuntimeException("Group not found: " + request.groupId()));
-
-        if (!group.getTenantId().equals(tenant.getId())) {
-            throw new RuntimeException("Unauthorized to create definition in group: " + request.groupId());
-        }
 
         CustomFieldDefinition definition = new CustomFieldDefinition();
         definition.setGroup(group);
@@ -306,7 +285,7 @@ public class CustomFieldService {
                 .orElseThrow(() -> new RuntimeException("Definition not found: " + request.id()));
 
         CustomFieldGroup group = definition.getGroup();
-        if (!group.getTenantId().equals(tenant.getId())) {
+        if (!group.getTenant().getId().equals(tenant.getId())) {
             throw new RuntimeException("Unauthorized to update definition: " + request.id());
         }
 
@@ -327,13 +306,9 @@ public class CustomFieldService {
 
     @Transactional
     public void deleteDefinition(Long id) {
-        Tenant tenant = UserContextHolder.get().getUser().getTenant();
         CustomFieldDefinition definition = definitionRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Definition not found: " + id));
 
-        if (!definition.getGroup().getTenantId().equals(tenant.getId())) {
-            throw new RuntimeException("Unauthorized to delete definition: " + id);
-        }
         definitionRepository.delete(definition);
     }
 

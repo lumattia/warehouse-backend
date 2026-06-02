@@ -8,5 +8,4 @@ import java.util.List;
 
 @Repository
 public interface CustomFieldDefinitionRepository extends JpaRepository<CustomFieldDefinition, Long> {
-    List<CustomFieldDefinition> findByGroupIdOrderByFieldOrderAsc(Long groupId);
 }

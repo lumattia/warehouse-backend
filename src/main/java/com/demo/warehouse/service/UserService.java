@@ -31,7 +31,7 @@ public class UserService {
 
     @Transactional(readOnly = true)
     public Page<UserDto.UserResponse> page(Specification<User> spec, Pageable pageable) {
-        return userRepository.getBySpec(spec, pageable).map(userMapper::toResponse);
+        return userRepository.pageBySpec(spec, pageable).map(userMapper::toResponse);
     }
     
     @Transactional(readOnly = true)

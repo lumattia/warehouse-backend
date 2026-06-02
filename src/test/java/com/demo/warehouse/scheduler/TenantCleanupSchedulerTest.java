@@ -6,6 +6,7 @@ import com.demo.warehouse.domain.UserRole;
 import com.demo.warehouse.repository.TenantRepository;
 import com.demo.warehouse.repository.UserRepository;
 import com.demo.warehouse.service.Auth0ManagementService;
+import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -29,6 +30,8 @@ class TenantCleanupSchedulerTest {
 
     @Mock
     private Auth0ManagementService auth0ManagementService;
+    @Mock
+    private EntityManager entityManager;
 
     @InjectMocks
     private TenantCleanupScheduler tenantCleanupScheduler;

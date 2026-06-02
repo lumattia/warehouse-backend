@@ -124,7 +124,7 @@ class DressControllerTest {
     void update_ShouldReturnUpdatedDress() throws Exception {
         when(dressService.update(any())).thenReturn(dressResponse);
 
-        mockMvc.perform(put("/dresses/update")
+        mockMvc.perform(put("/dresses/update/1")
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(updateRequest)))

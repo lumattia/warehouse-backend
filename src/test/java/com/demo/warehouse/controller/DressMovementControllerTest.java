@@ -122,7 +122,7 @@ class DressMovementControllerTest {
         );
         when(dressMovementService.update(any())).thenReturn(dressMovement);
 
-        mockMvc.perform(put("/dress-movements/update")
+        mockMvc.perform(put("/dress-movements/update/1")
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))

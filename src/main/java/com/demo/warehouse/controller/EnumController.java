@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
-import java.util.Set;
 
 @RestController
 @RequestMapping("/enums")
@@ -27,7 +26,7 @@ public class EnumController {
         };
     }
     @GetMapping("/modules")
-    public Set<ModuleType> getAssignableModules() {
-        return UserContextHolder.get().getUser().getTenant().getModules();
+    public List<ModuleType> getAssignableModules() {
+        return UserContextHolder.get().getUser().getTenant().getModules().stream().sorted().toList();
     }
 }

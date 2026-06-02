@@ -4,6 +4,7 @@ import com.demo.warehouse.domain.ModuleType;
 import com.demo.warehouse.domain.Tenant;
 import com.demo.warehouse.domain.FieldValidations;
 import com.demo.warehouse.mapper.CustomFieldDtos;
+import com.demo.warehouse.repository.UserRepository;
 import com.demo.warehouse.service.CustomFieldService;
 import com.demo.warehouse.testutils.TestFactory;
 import org.junit.jupiter.api.AfterEach;
@@ -29,7 +30,8 @@ class CustomFieldControllerTest {
 
     @MockitoBean
     private CustomFieldService customFieldService;
-
+    @MockitoBean
+    private UserRepository userRepository;
     private Tenant tenant;
 
     @BeforeEach
@@ -116,7 +118,7 @@ class CustomFieldControllerTest {
     @Test
     void updateGroup_ShouldUpdateGroup() throws Exception {
         CustomFieldDtos.CustomFieldGroupUpdateRequest request = new CustomFieldDtos.CustomFieldGroupUpdateRequest(
-            1L, "Updated Group", 1, ModuleType.DRESS
+            1L, "Updated Group", 1
         );
         CustomFieldDtos.CustomFieldGroupResponse response = new CustomFieldDtos.CustomFieldGroupResponse(
             1L, "Updated Group", 1, ModuleType.DRESS, List.of()
@@ -124,7 +126,7 @@ class CustomFieldControllerTest {
         
         when(customFieldService.updateGroup(any())).thenReturn(response);
 
-        mockMvc.perform(put("/custom-fields/groups")
+        mockMvc.perform(put("/custom-fields/groups/1")
                         .with(csrf())
                         .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
                         .content("{\"id\":1,\"name\":\"Updated Group\",\"groupOrder\":1,\"module\":\"DRESS\"}"))
@@ -169,7 +171,7 @@ class CustomFieldControllerTest {
         
         when(customFieldService.updateDefinition(any())).thenReturn(response);
 
-        mockMvc.perform(put("/custom-fields/definitions")
+        mockMvc.perform(put("/custom-fields/definitions/1")
                         .with(csrf())
                         .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
                         .content("{\"id\":1,\"groupId\":1,\"label\":\"Updated Field\",\"type\":\"TEXT\",\"fieldOrder\":1}"))

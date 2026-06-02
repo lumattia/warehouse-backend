@@ -54,15 +54,17 @@ public interface BaseRepository<T extends TenantScopedEntity, ID> extends Reposi
      * Find entity by ID or throw exception if not found or not belonging to current tenant
      */
     T getByIdOrThrow(ID id);
+    Optional<T> getBySpec(Specification<T> spec);
 
     /**
      * Return projected IdName list filtered by tenant
      */
     List<IdName<ID>> getAllAsIdName();
+    List<T> listBySpec(Specification<T> spec);
 
     /**
      * Find entities with specification and mandatory tenant filter
      * Auto-corrects pagination if requested page is out of range
      */
-    Page<T> getBySpec(Specification<T> spec, Pageable pageable);
+    Page<T> pageBySpec(Specification<T> spec, Pageable pageable);
 }

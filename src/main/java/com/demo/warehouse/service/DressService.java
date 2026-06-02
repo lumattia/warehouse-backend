@@ -27,7 +27,7 @@ public class DressService {
 
     @Transactional(readOnly = true)
     public Page<DressDtos.DressResponse> page(Specification<Dress> spec, @Nonnull Pageable pageable) {
-        return dressRepository.getBySpec(spec, pageable).map(dressMapper::toResponse);
+        return dressRepository.pageBySpec(spec, pageable).map(dressMapper::toResponse);
     }
     
     @Transactional(readOnly = true)

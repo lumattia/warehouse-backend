@@ -59,6 +59,9 @@ public class TenantController {
     @PutMapping("/update/{id}")
     @PreAuthorize("@securityService.canManageTenants()")
     public TenantDtos.TenantResponse update(@PathVariable UUID id, @RequestBody TenantDtos.TenantUpdateRequest request) {
+        if (!id.equals(request.id())) {
+            throw new IllegalArgumentException("El ID de la URL no coincide con el ID del cuerpo");
+        }
         return tenantService.update(request);
     }
 

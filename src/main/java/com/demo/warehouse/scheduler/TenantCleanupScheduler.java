@@ -2,6 +2,8 @@ package com.demo.warehouse.scheduler;
 
 import java.time.Instant;
 import java.util.List;
+
+import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -22,6 +24,7 @@ public class TenantCleanupScheduler {
     private final TenantRepository tenantRepository;
     private final UserRepository userRepository;
     private final Auth0ManagementService auth0ManagementService;
+    private final EntityManager entityManager;
 
     @Transactional
     @Scheduled(cron = "0 * * * * *")
@@ -38,10 +41,11 @@ public class TenantCleanupScheduler {
                 if (user.getAuth0Sub() != null && user.getAuth0Sub().startsWith("auth0|")) {
                     auth0ManagementService.deleteUser(user.getAuth0Sub());
                 }
+                entityManager.detach(user);
             }
         }
-
         tenantRepository.deleteAll(expiredTenants);
+
         log.info("Removed {} expired tenants and their Auth0 users", expiredTenants.size());
     }
 }

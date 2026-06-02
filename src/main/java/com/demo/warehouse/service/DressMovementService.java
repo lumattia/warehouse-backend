@@ -22,7 +22,7 @@ public class DressMovementService {
 
     @Transactional(readOnly = true)
     public Page<DressMovement> page(Specification<DressMovement> spec, Pageable pageable) {
-        return dressMovementRepository.getBySpec(spec, pageable);
+        return dressMovementRepository.pageBySpec(spec, pageable);
     }
 
     @Transactional(readOnly = true)

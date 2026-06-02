@@ -19,6 +19,8 @@ import com.demo.warehouse.mapper.IdName;
 import com.demo.warehouse.mapper.IdNameImpl;
 import com.demo.warehouse.tenantFilter.UserContextHolder;
 
+import javax.swing.text.html.Option;
+
 public class BaseRepositoryImpl<T extends TenantScopedEntity, ID> extends SimpleJpaRepository<T, ID> implements BaseRepository<T, ID> {
 
     private final EntityManager entityManager;
@@ -135,7 +137,10 @@ public class BaseRepositoryImpl<T extends TenantScopedEntity, ID> extends Simple
         return findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Entity not found with ID: " + id + " or not belonging to current tenant"));
     }
-
+    public Optional<T> getBySpec(Specification<T> spec) {
+        var combinedSpec = combineWithTenantFilter(spec);
+        return super.findOne(combinedSpec);
+    }
     @Override
     @SuppressWarnings({ "unchecked" })
     public List<IdName<ID>> getAllAsIdName() {
@@ -152,8 +157,11 @@ public class BaseRepositoryImpl<T extends TenantScopedEntity, ID> extends Simple
         return (List<IdName<ID>>) (List<?>) entityManager.createQuery(cq).getResultList();
     }
 
-    @Override
-    public Page<T> getBySpec(Specification<T> spec, Pageable pageable) {
+    public List<T> listBySpec(Specification<T> spec) {
+        var combinedSpec = combineWithTenantFilter(spec);
+        return super.findAll(combinedSpec);
+    }
+    public Page<T> pageBySpec(Specification<T> spec, Pageable pageable) {
         var combinedSpec = combineWithTenantFilter(spec);
         var totalCount = super.count(combinedSpec);
         

@@ -44,8 +44,11 @@ public class DressMovementController {
         return dressMovementService.create(request);
     }
 
-    @PutMapping("/update")
-    public DressMovement update(@Valid @RequestBody DressMovementUpdateRequest request) {
+    @PutMapping("/update/{id}")
+    public DressMovement update(@PathVariable Long id, @Valid @RequestBody DressMovementUpdateRequest request) {
+        if (!id.equals(request.id())) {
+            throw new IllegalArgumentException("El ID de la URL no coincide con el ID del cuerpo");
+        }
         return dressMovementService.update(request);
     }
 

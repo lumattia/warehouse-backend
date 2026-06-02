@@ -25,7 +25,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @Entity
 @Table(name = "custom_field_groups")
-public class CustomFieldGroup {
+public class CustomFieldGroup extends TenantScopedEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -40,9 +40,6 @@ public class CustomFieldGroup {
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private ModuleType module;
-
-    @Column(nullable = false)
-    private UUID tenantId;
 
     @OneToMany(mappedBy = "group", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @jakarta.persistence.OrderBy("fieldOrder ASC")

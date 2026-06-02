@@ -14,9 +14,11 @@ import com.demo.warehouse.testutils.TestFactory;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.jpa.domain.Specification;
 
 import java.util.*;
 
@@ -24,7 +26,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-@SpringBootTest
+@ExtendWith(MockitoExtension.class)
 class CustomFieldServiceTest {
 
     @Mock
@@ -53,7 +55,7 @@ class CustomFieldServiceTest {
         group.setName("Test Group");
         group.setGroupOrder(0);
         group.setModule(ModuleType.DRESS);
-        group.setTenantId(tenant.getId());
+        group.setTenant(tenant);
         group.setDefinitions(new ArrayList<>());
         
         definition = new CustomFieldDefinition();
@@ -81,12 +83,12 @@ class CustomFieldServiceTest {
         List<CustomFieldDtos.CustomFieldGroupResponse> result = customFieldService.getFormStructureForEntity(ModuleType.DRESS, 1L);
         
         assertTrue(result.isEmpty());
-        verify(groupRepository, never()).findByTenantIdAndModuleOrderByGroupOrderAsc(any(), any());
+        verify(groupRepository, never()).listBySpec(any(Specification.class));
     }
 
     @Test
     void getFormStructureForEntity_WhenHasCustomFieldsTrue_ReturnsStructure() {
-        when(groupRepository.findByTenantIdAndModuleOrderByGroupOrderAsc(tenant.getId(), ModuleType.DRESS))
+        when(groupRepository.listBySpec(any(Specification.class)))
             .thenReturn(List.of(group));
         
         List<CustomFieldDtos.CustomFieldGroupResponse> result = customFieldService.getFormStructureForEntity(ModuleType.DRESS, 1L);
@@ -100,7 +102,7 @@ class CustomFieldServiceTest {
     @Test
     void validateAndSaveValues_WhenRequiredFieldEmpty_ThrowsException() {
         definition.setValidations(new FieldValidations(true, null, null, null, null));
-        when(groupRepository.findByTenantIdAndModuleOrderByGroupOrderAsc(tenant.getId(), ModuleType.DRESS))
+        when(groupRepository.listBySpec(any(Specification.class)))
             .thenReturn(List.of(group));
         
         Map<Long, String> customFields = new HashMap<>();
@@ -114,7 +116,7 @@ class CustomFieldServiceTest {
     void validateAndSaveValues_WhenNumberFieldInvalid_ThrowsException() {
         definition.setType(com.demo.warehouse.domain.CustomFieldType.NUMBER);
         definition.setValidations(new FieldValidations(false, 10.0, null, null, null));
-        when(groupRepository.findByTenantIdAndModuleOrderByGroupOrderAsc(tenant.getId(), ModuleType.DRESS))
+        when(groupRepository.listBySpec(any(Specification.class)))
             .thenReturn(List.of(group));
         
         Map<Long, String> customFields = new HashMap<>();
@@ -125,34 +127,10 @@ class CustomFieldServiceTest {
     }
 
     @Test
-    void updateOrders_WhenDuplicateGroupOrders_ThrowsException() {
-        List<CustomFieldDtos.OrderUpdateDTO> groupOrders = List.of(
-            new CustomFieldDtos.OrderUpdateDTO(1L, 1),
-            new CustomFieldDtos.OrderUpdateDTO(2L, 1)
-        );
-        
-        assertThrows(RuntimeException.class, () -> 
-            customFieldService.updateOrders(ModuleType.DRESS, groupOrders, List.of()));
-    }
-
-    @Test
-    void updateOrders_WhenDuplicateFieldOrders_ThrowsException() {
-        List<CustomFieldDtos.OrderUpdateDTO> fieldOrders = List.of(
-            new CustomFieldDtos.OrderUpdateDTO(1L, 1),
-            new CustomFieldDtos.OrderUpdateDTO(2L, 1)
-        );
-        
-        assertThrows(RuntimeException.class, () -> 
-            customFieldService.updateOrders(ModuleType.DRESS, List.of(), fieldOrders));
-    }
-
-    @Test
     void updateOrders_WhenValid_UpdatesOrders() {
-        List<CustomFieldDtos.OrderUpdateDTO> groupOrders = List.of(
-            new CustomFieldDtos.OrderUpdateDTO(1L, 1)
-        );
-        List<CustomFieldDtos.OrderUpdateDTO> fieldOrders = List.of(
-            new CustomFieldDtos.OrderUpdateDTO(1L, 1)
+        List<Long> groupOrders = List.of(1L);
+        List<CustomFieldDtos.FieldOrderUpdate> fieldOrders = List.of(
+            new CustomFieldDtos.FieldOrderUpdate(1L, 1L)
         );
         
         when(groupRepository.findById(1L)).thenReturn(Optional.of(group));
@@ -160,9 +138,38 @@ class CustomFieldServiceTest {
         
         customFieldService.updateOrders(ModuleType.DRESS, groupOrders, fieldOrders);
         
-        assertEquals(1, group.getGroupOrder());
-        assertEquals(1, definition.getFieldOrder());
+        assertEquals(0, group.getGroupOrder());
+        assertEquals(0, definition.getFieldOrder());
+        assertEquals(group, definition.getGroup());
         verify(groupRepository).save(group);
+        verify(definitionRepository).save(definition);
+    }
+
+    @Test
+    void updateOrders_WhenMovingFieldToDifferentGroup_UpdatesGroupId() {
+        List<Long> groupOrders = List.of(1L, 2L);
+        List<CustomFieldDtos.FieldOrderUpdate> fieldOrders = List.of(
+            new CustomFieldDtos.FieldOrderUpdate(1L, 2L)
+        );
+        
+        CustomFieldGroup group1 = new CustomFieldGroup();
+        group1.setId(1L);
+        group1.setTenant(tenant);
+        group1.setModule(ModuleType.DRESS);
+        
+        CustomFieldGroup group2 = new CustomFieldGroup();
+        group2.setId(2L);
+        group2.setTenant(tenant);
+        group2.setModule(ModuleType.DRESS);
+        
+        when(groupRepository.findById(1L)).thenReturn(Optional.of(group1));
+        when(groupRepository.findById(2L)).thenReturn(Optional.of(group2));
+        when(definitionRepository.findById(1L)).thenReturn(Optional.of(definition));
+        
+        customFieldService.updateOrders(ModuleType.DRESS, groupOrders, fieldOrders);
+        
+        assertEquals(0, definition.getFieldOrder());
+        assertEquals(group2, definition.getGroup());
         verify(definitionRepository).save(definition);
     }
 }

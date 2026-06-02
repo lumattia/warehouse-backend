@@ -129,9 +129,8 @@ public class UserController {
 
     @PutMapping("/update/{id}")
     public UserDto.UserResponse update(@PathVariable Long id, @RequestBody UserDto.UserUpdateRequest request) {
-        User currentUser = UserContextHolder.get().getUser();
-        if (currentUser.getRole() == UserRole.USER && !currentUser.getId().equals(id)) {
-            throw new RuntimeException("USER can only update their own profile");
+        if (!id.equals(request.id())) {
+            throw new IllegalArgumentException("El ID de la URL no coincide con el ID del cuerpo");
         }
         return userService.update(request);
     }

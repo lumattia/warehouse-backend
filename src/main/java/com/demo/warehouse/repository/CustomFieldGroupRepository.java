@@ -10,7 +10,5 @@ import java.util.List;
 import java.util.UUID;
 
 @Repository
-public interface CustomFieldGroupRepository extends JpaRepository<CustomFieldGroup, Long> {
-    List<CustomFieldGroup> findByTenantIdAndModuleOrderByGroupOrderAsc(UUID tenantId, ModuleType module);
-    void deleteByTenantId(UUID tenantId);
+public interface CustomFieldGroupRepository extends BaseRepository<CustomFieldGroup, Long> {
 }

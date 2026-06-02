@@ -32,9 +32,7 @@ public class CustomFieldDtos {
         Long id,
         @NotBlank
         String name,
-        Integer groupOrder,
-        @NotNull
-        ModuleType module
+        Integer groupOrder
     ) {}
 
     public static record CustomFieldDefinitionResponse(
@@ -71,16 +69,14 @@ public class CustomFieldDtos {
         FieldValidations validations
     ) {}
 
-    public static record OrderUpdateDTO(
-        @NotNull
-        Long id,
-        @NotNull
-        Integer order
+    public static record OrderUpdateRequest(
+        List<Long> groupOrders,
+        List<FieldOrderUpdate> fieldOrders
     ) {}
 
-    public static record OrderUpdateRequest(
-        List<OrderUpdateDTO> groupOrders,
-        List<OrderUpdateDTO> fieldOrders
+    public static record FieldOrderUpdate(
+        Long fieldId,
+        Long groupId
     ) {}
 
     public static record CustomFieldValueSaveRequest(

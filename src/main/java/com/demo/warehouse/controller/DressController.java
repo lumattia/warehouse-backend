@@ -48,9 +48,12 @@ public class DressController {
     public DressDtos.DressResponse create(@Valid @RequestBody DressDtos.DressCreateRequest request) {
         return dressService.create(request);
     }
-    @PutMapping("/update")
+    @PutMapping("/update/{id}")
     @PreAuthorize("@securityService.isAtLeast('ADMIN')")
-    public DressDtos.DressResponse update(@Valid @RequestBody DressDtos.DressUpdateRequest request) {
+    public DressDtos.DressResponse update(@PathVariable Long id, @Valid @RequestBody DressDtos.DressUpdateRequest request) {
+        if (!id.equals(request.id())) {
+            throw new IllegalArgumentException("El ID de la URL no coincide con el ID del cuerpo");
+        }
         return dressService.update(request);
     }
     @DeleteMapping("/delete/{id}")

@@ -53,10 +53,13 @@ public class CustomFieldController {
         return customFieldService.createGroup(request);
     }
 
-    @PutMapping("/groups")
+    @PutMapping("/groups/{id}")
     @PreAuthorize("@securityService.isAtLeast('ADMIN')")
-    public CustomFieldDtos.CustomFieldGroupResponse updateGroup(
+    public CustomFieldDtos.CustomFieldGroupResponse updateGroup(@PathVariable Long id,
             @RequestBody CustomFieldDtos.CustomFieldGroupUpdateRequest request) {
+        if (!id.equals(request.id())) {
+            throw new IllegalArgumentException("El ID de la URL no coincide con el ID del cuerpo");
+        }
         return customFieldService.updateGroup(request);
     }
 
@@ -73,10 +76,13 @@ public class CustomFieldController {
         return customFieldService.createDefinition(request);
     }
 
-    @PutMapping("/definitions")
+    @PutMapping("/definitions/{id}")
     @PreAuthorize("@securityService.isAtLeast('ADMIN')")
-    public CustomFieldDtos.CustomFieldDefinitionResponse updateDefinition(
+    public CustomFieldDtos.CustomFieldDefinitionResponse updateDefinition(@PathVariable Long id,
             @RequestBody CustomFieldDtos.CustomFieldDefinitionUpdateRequest request) {
+        if (!id.equals(request.id())) {
+            throw new IllegalArgumentException("El ID de la URL no coincide con el ID del cuerpo");
+        }
         return customFieldService.updateDefinition(request);
     }
 

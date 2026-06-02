@@ -11,5 +11,4 @@ import java.util.Optional;
 public interface CustomFieldValueRepository extends JpaRepository<CustomFieldValue, Long> {
     Optional<CustomFieldValue> findByDefinitionIdAndTargetId(Long definitionId, Long targetId);
     List<CustomFieldValue> findByTargetId(Long targetId);
-    void deleteByTargetId(Long targetId);
 }

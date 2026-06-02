@@ -49,13 +49,13 @@ class DressMovementServiceTest {
     @Test
     void page_ShouldReturnPageOfDressMovements() {
         Page<DressMovement> page = new PageImpl<>(java.util.Collections.singletonList(dressMovement), PageRequest.of(0, 10), 1);
-        when(dressMovementRepository.getBySpec(any(), any(Pageable.class))).thenReturn(page);
+        when(dressMovementRepository.pageBySpec(any(), any(Pageable.class))).thenReturn(page);
         Specification<DressMovement> dummySpec = (root, query, criteriaBuilder) -> null;
         Page<DressMovement> result = dressMovementService.page(dummySpec, PageRequest.of(0, 10));
 
         assertNotNull(result);
         assertEquals(1, result.getTotalElements());
-        verify(dressMovementRepository, times(1)).getBySpec(any(), any(Pageable.class));
+        verify(dressMovementRepository, times(1)).pageBySpec(any(), any(Pageable.class));
     }
 
     @Test
