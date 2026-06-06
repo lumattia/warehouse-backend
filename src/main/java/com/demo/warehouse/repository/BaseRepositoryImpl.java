@@ -6,6 +6,9 @@ import java.util.UUID;
 
 import jakarta.persistence.EntityManager;
 
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -18,8 +21,6 @@ import com.demo.warehouse.domain.TenantScopedEntity;
 import com.demo.warehouse.mapper.IdName;
 import com.demo.warehouse.mapper.IdNameImpl;
 import com.demo.warehouse.tenantFilter.UserContextHolder;
-
-import javax.swing.text.html.Option;
 
 public class BaseRepositoryImpl<T extends TenantScopedEntity, ID> extends SimpleJpaRepository<T, ID> implements BaseRepository<T, ID> {
 
@@ -54,36 +55,26 @@ public class BaseRepositoryImpl<T extends TenantScopedEntity, ID> extends Simple
 
     @Override
     @Transactional
+    @NullMarked
     public <S extends T> S save(S entity) {
-        if (entity instanceof TenantScopedEntity) {
-            var tenantScoped = (TenantScopedEntity) entity;
-            if (tenantScoped.getTenant() == null) {
-                var tenantId = getCurrentTenantId();
-                var tenant = entityManager.find(com.demo.warehouse.domain.Tenant.class, tenantId);
-                if (tenant == null) {
-                    throw new IllegalArgumentException("Tenant not found with ID: " + tenantId);
-                }
-                tenantScoped.setTenant(tenant);
-            }
+        var tenantScoped = (TenantScopedEntity) entity;
+        if (tenantScoped.getTenant() == null) {
+            var tenant = UserContextHolder.getTenant();
+            tenantScoped.setTenant(tenant);
         }
         return super.save(entity);
     }
 
     @Override
     @Transactional
+    @NullMarked
     public <S extends T> List<S> saveAll(Iterable<S> entities) {
-        var tenantId = getCurrentTenantId();
-        var tenant = entityManager.find(com.demo.warehouse.domain.Tenant.class, tenantId);
-        if (tenant == null) {
-            throw new IllegalArgumentException("Tenant not found with ID: " + tenantId);
-        }
+        var tenant = UserContextHolder.getTenant();
 
         for (var entity : entities) {
-            if (entity instanceof TenantScopedEntity) {
-                var tenantScoped = (TenantScopedEntity) entity;
-                if (tenantScoped.getTenant() == null) {
-                    tenantScoped.setTenant(tenant);
-                }
+            var tenantScoped = (TenantScopedEntity) entity;
+            if (tenantScoped.getTenant() == null) {
+                tenantScoped.setTenant(tenant);
             }
         }
         return super.saveAll(entities);
@@ -91,20 +82,18 @@ public class BaseRepositoryImpl<T extends TenantScopedEntity, ID> extends Simple
 
     @Override
     @Transactional
-    public void deleteById(ID id) {
+    public void deleteById(@Nullable ID id) {
         var entity = getByIdOrThrow(id);
         super.delete(entity);
     }
 
     @Override
     @Transactional
-    public void delete(T entity) {
-        if (entity instanceof TenantScopedEntity) {
-            var tenantScoped = (TenantScopedEntity) entity;
-            var currentTenantId = getCurrentTenantId();
-            if (!tenantScoped.getTenant().getId().equals(currentTenantId)) {
-                throw new IllegalArgumentException("Cannot delete entity from different tenant");
-            }
+    public void delete(@NonNull T entity) {
+        var tenantScoped = (TenantScopedEntity) entity;
+        var currentTenantId = getCurrentTenantId();
+        if (!tenantScoped.getTenant().getId().equals(currentTenantId)) {
+            throw new IllegalArgumentException("Cannot delete entity from different tenant");
         }
         super.delete(entity);
     }
@@ -115,14 +104,19 @@ public class BaseRepositoryImpl<T extends TenantScopedEntity, ID> extends Simple
     }
 
     @Override
+    @NullMarked
     public long count(Specification<T> spec) {
         return super.count(combineWithTenantFilter(spec));
     }
 
     @Override
-    public Optional<T> findById(ID id) {
+    @NullMarked
+    public Optional<T> findById(@Nullable ID id) {
+        if (id == null) {
+            return Optional.empty();
+        }
         var entity = super.findById(id);
-        if (entity.isPresent() && entity.get() instanceof TenantScopedEntity) {
+        if (entity.isPresent()) {
             var tenantScoped = (TenantScopedEntity) entity.get();
             var currentTenantId = getCurrentTenantId();
             if (!tenantScoped.getTenant().getId().equals(currentTenantId)) {
@@ -133,7 +127,7 @@ public class BaseRepositoryImpl<T extends TenantScopedEntity, ID> extends Simple
     }
 
     @Override
-    public T getByIdOrThrow(ID id) {
+    public T getByIdOrThrow(@Nullable ID id) {
         return findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Entity not found with ID: " + id + " or not belonging to current tenant"));
     }

@@ -147,7 +147,7 @@ public class UserController {
         tenant.setModules(Set.of(ModuleType.DRESS, ModuleType.DRESS_MOVEMENT));
         tenant = tenantRepository.save(tenant);
 
-        User user = new User(null, username, null, auth0Sub, UserRole.RESELLER, Set.of(tenant));
+        User user = new User(null, username, auth0Sub, UserRole.RESELLER, Set.of(tenant));
         user.setTenant(tenant);
         return userRepository.save(user);
     }

@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 @Getter
 @Setter
@@ -17,8 +19,9 @@ public class CustomFieldValue {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(cascade = CascadeType.REMOVE)
+    @ManyToOne
     @JoinColumn(name = "definition_id", nullable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE) // 👈 Esto añade 'ON DELETE CASCADE' a la clave foránea DDL
     private CustomFieldDefinition definition;
 
     @Column(nullable = false)

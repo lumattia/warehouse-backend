@@ -116,6 +116,6 @@ public class TestFactory {
     }
 
     public static void setUserContextHolder(User user) {
-        UserContextHolder.set(UserContext.builder().realUser(user).build());
+        UserContextHolder.set(new UserContext(user));
     }
 }

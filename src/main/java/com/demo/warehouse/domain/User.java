@@ -39,9 +39,6 @@ public class User extends TenantScopedEntity {
     @Column(nullable = false, unique = true, length = 120)
     private String username;
 
-    @Column
-    private Long activeUserContextId;
-
     @Column(unique = true)
     private String auth0Sub;
 
