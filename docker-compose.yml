@@ -3,12 +3,12 @@ version: "3.9"
 services:
   postgres:
     image: postgres:16
-    container_name: warehouse_postgres
+    container_name: saas_demo_postgres
     restart: unless-stopped
     environment:
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: admin
-      POSTGRES_DB: warehouse_db
+      POSTGRES_DB: saas_demo_db
     ports:
       - "5432:5432"
     volumes:

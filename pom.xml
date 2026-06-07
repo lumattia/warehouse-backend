@@ -12,10 +12,10 @@
     </parent>
 
     <groupId>com.example</groupId>
-    <artifactId>warehouse-multitenant</artifactId>
+    <artifactId>saas-demo</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>warehouse-multitenant</name>
-    <description>Multi-tenant warehouse for dresses</description>
+    <name>saas-demo</name>
+    <description>Multi-tenant SaaS demo application</description>
 
     <properties>
         <java.version>26</java.version>

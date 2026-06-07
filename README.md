@@ -1,4 +1,4 @@
-# 🏭 Multi-Tenant Warehouse Management System (SaaS Demo)
+# 🏭 Multi-Tenant SaaS Demo
 
 [![Java](https://img.shields.io/badge/Java-26-007396?style=for-the-badge&logo=java&logoColor=white)](https://jdk.java.net/26/)
 [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.3-6DB33F?style=for-the-badge&logo=spring-boot&logoColor=white)](https://spring.io/projects/spring-boot)
@@ -6,7 +6,7 @@
 [![Auth0](https://img.shields.io/badge/Auth0-Security-EB5424?style=for-the-badge&logo=auth0&logoColor=white)](https://auth0.com/)
 
 ## 📖 Introducción
-Este proyecto es una **demo técnica** que demuestra la transición de arquitecturas empresariales desde **.NET 8** hacia el ecosistema de **Java 26**. El objetivo es exponer un sistema de gestión de almacén con aislamiento de datos (Multi-tenancy) y seguridad integrada, aplicando las capacidades más recientes de Spring Boot.
+Este proyecto es una **demo técnica** que demuestra la transición de arquitecturas empresariales desde **.NET 8** hacia el ecosistema de **Java 26**. El objetivo es exponer un sistema de gestión multi-inquilino con aislamiento de datos (Multi-tenancy) y seguridad integrada, aplicando las capacidades más recientes de Spring Boot.
 
 > **🚧 Nota sobre el estado del proyecto:** Esta no es la versión final. El sistema se encuentra en desarrollo activo y próximamente se realizará el despliegue en la nube.
 > 
