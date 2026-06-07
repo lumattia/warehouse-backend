@@ -57,7 +57,6 @@ class MultiTenantSecurityFilterTest {
         user.setId(1L);
         user.setAuth0Sub("auth0|test123");
         user.setTenant(tenant);
-        user.setActiveUserContextId(null);
     }
 
     @Test

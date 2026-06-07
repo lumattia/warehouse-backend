@@ -47,10 +47,10 @@ class TenantCleanupSchedulerTest {
         expiredTenant.setName("Expired Tenant");
         expiredTenant.setExpiresAt(Instant.now().minusSeconds(3600));
 
-        userWithAuth0Sub = new User(1L, "user1", null, "auth0|123456", UserRole.USER, new HashSet<>());
+        userWithAuth0Sub = new User(1L, "user1", "auth0|123456", UserRole.USER, new HashSet<>());
         userWithAuth0Sub.setTenant(expiredTenant);
 
-        userWithoutAuth0Sub = new User(2L, "user2", null, null, UserRole.USER, new HashSet<>());
+        userWithoutAuth0Sub = new User(2L, "user2", null, UserRole.USER, new HashSet<>());
         userWithoutAuth0Sub.setTenant(expiredTenant);
     }
 
@@ -126,7 +126,7 @@ class TenantCleanupSchedulerTest {
         expiredTenant2.setName("Expired Tenant 2");
         expiredTenant2.setExpiresAt(Instant.now().minusSeconds(3600));
 
-        User user2 = new User(3L, "user3", null, "auth0|789012", UserRole.USER, new HashSet<>());
+        User user2 = new User(3L, "user3", "auth0|789012", UserRole.USER, new HashSet<>());
         user2.setTenant(expiredTenant2);
 
         List<Tenant> expiredTenants = List.of(expiredTenant, expiredTenant2);

@@ -32,7 +32,7 @@ class SecurityServiceTest {
         testTenant.setModules(Set.of(ModuleType.DRESS, ModuleType.DRESS_MOVEMENT));
 
 
-        testUser = new User(1L, "testuser", null, "", UserRole.SUPERADMIN, Set.of(testTenant));
+        testUser = new User(1L, "testuser", "", UserRole.SUPERADMIN, Set.of(testTenant));
         testUser.setTenant(testTenant);
         TestFactory.setUserContextHolder(testUser);
     }

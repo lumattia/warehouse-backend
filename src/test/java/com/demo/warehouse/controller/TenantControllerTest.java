@@ -63,7 +63,7 @@ class TenantControllerTest {
         tenant.setId(UUID.randomUUID());
         tenant.setName("Test Tenant");
         tenant.setModules(Set.of(ModuleType.DRESS));
-        user = new User(null, "testuser", null, "", UserRole.SUPERADMIN, new HashSet<>());
+        user = new User(null, "testuser", "", UserRole.SUPERADMIN, new HashSet<>());
 
         tenantResponse = TenantDtos.TenantResponse.builder()
                 .id(tenant.getId())

@@ -91,14 +91,14 @@ public class TestFactory {
         return createTenantResponse(id, "Test Tenant", Set.of(ModuleType.DRESS));
     }
 
-    public static User createUser(Long id, String username, Long activeUserContextId, String auth0Sub, UserRole role, Tenant tenant, Set<Tenant> allowedTenants) {
-        User user = new User(id, username, activeUserContextId, auth0Sub, role, allowedTenants != null ? allowedTenants : new HashSet<>());
+    public static User createUser(Long id, String username, String auth0Sub, UserRole role, Tenant tenant, Set<Tenant> allowedTenants) {
+        User user = new User(id, username, auth0Sub, role, allowedTenants != null ? allowedTenants : new HashSet<>());
         user.setTenant(tenant);
         return user;
     }
 
     public static User createDefaultUser(Tenant tenant) {
-        return createUser(1L, "testuser", null, null, UserRole.SUPERADMIN, tenant, new HashSet<>());
+        return createUser(1L, "testuser", null, UserRole.SUPERADMIN, tenant, new HashSet<>());
     }
 
     public static UserDto.UserResponse createUserResponse(Long id, String username, UserRole role, Tenant tenant, boolean isEditable) {
